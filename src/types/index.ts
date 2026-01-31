@@ -1,0 +1,282 @@
+// Form Data Interfaces
+export interface ContactFormData extends Record<string, unknown> {
+  name: string;
+  email: string;
+  phone?: string;
+  message: string;
+}
+
+export interface RegistrationFormData extends Record<string, unknown> {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  emergencyContact: string;
+  emergencyPhone: string;
+  experience: 'beginner' | 'intermediate' | 'advanced';
+  classPreference: string;
+  medicalConditions?: string;
+  agreeToTerms: boolean;
+}
+
+// Content Models
+export interface Coach {
+  id: string;
+  name: string;
+  title: string;
+  bio: string;
+  specialties: string[];
+  image?: string;
+  certifications: string[];
+  yearsExperience: number;
+  email?: string;
+}
+
+export interface Event {
+  id: string;
+  title: string;
+  date: Date;
+  time: string;
+  location: string;
+  description: string;
+  type: 'race' | 'training' | 'social';
+  registrationRequired: boolean;
+  maxParticipants?: number;
+  currentParticipants?: number;
+  registrationDeadline?: Date;
+  cost?: number;
+}
+
+export interface VelocityClass {
+  id: string;
+  name: string;
+  description: string;
+  schedule: string;
+  duration: string;
+  maxParticipants: number;
+  currentEnrollment: number;
+  instructor: string;
+  level: 'beginner' | 'intermediate' | 'advanced';
+  cost: number;
+  location: string;
+  equipment?: string[];
+  prerequisites?: string[];
+}
+
+// Store Models
+export interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  originalPrice?: number;
+  category: 'apparel' | 'gear' | 'accessories' | 'nutrition';
+  images: string[];
+  inStock: boolean;
+  stockQuantity: number;
+  sizes?: string[];
+  colors?: string[];
+  rating: number;
+  reviewCount: number;
+  features?: string[];
+  brand?: string;
+}
+
+// News Models
+export interface NewsArticle {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  author: string;
+  publishedAt: Date;
+  updatedAt: Date;
+  status: 'draft' | 'published' | 'archived';
+  category: 'race-results' | 'training-tips' | 'team-news' | 'events' | 'general';
+  featuredImage?: string;
+  tags: string[];
+  featured: boolean;
+  readTime: number;
+}
+
+// User Management Models
+export interface Person {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+  image?: string;
+  specializations?: string[]; // For coaches
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface User {
+  id: string;
+  personId: string;
+  username: string;
+  email: string;
+  lastLogin?: Date;
+  createdAt: Date;
+  updatedAt: Date;
+  // Joined data from Person table
+  person?: Person;
+}
+
+export interface UserWithPerson extends User {
+  person: Person;
+}
+
+export interface CoachWithPerson extends UserWithPerson {
+  // Additional coach-specific fields that might come from a separate coaches table
+  title?: string;
+  bio?: string;
+  certifications?: string[];
+  yearsExperience?: number;
+  image?: string;
+}
+
+// Page Content Model
+export interface PageContent {
+  title: string;
+  description: string;
+  image?: string;
+  content: React.ReactNode;
+}
+
+// Navigation Models
+export interface NavigationItem {
+  name: string;
+  href: string;
+  icon?: React.ComponentType<{ className?: string }>;
+}
+
+export interface RouteConfig {
+  path: string;
+  component: React.ComponentType;
+  title: string;
+  description: string;
+}
+
+// Form Validation Models
+export interface FormError {
+  field: string;
+  message: string;
+  type: 'required' | 'pattern' | 'minLength' | 'maxLength' | 'custom';
+}
+
+export interface ValidationRule {
+  required?: boolean | string;
+  minLength?: { value: number; message: string };
+  maxLength?: { value: number; message: string };
+  pattern?: { value: RegExp; message: string };
+  validate?: (value: unknown) => boolean | string;
+}
+
+// API Response Models
+export interface ApiResponse<T> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  message?: string;
+}
+
+// Carousel Models
+export interface CarouselImage {
+  src: string;
+  alt: string;
+  title?: string;
+  description?: string;
+}
+
+// Component Props Models
+export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  variant?: 'primary' | 'secondary' | 'outline';
+  size?: 'sm' | 'md' | 'lg';
+  loading?: boolean;
+  children: React.ReactNode;
+}
+
+export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  label?: string;
+  error?: string;
+  helperText?: string;
+}
+
+export interface SelectOption {
+  value: string;
+  label: string;
+}
+
+export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
+  label?: string;
+  error?: string;
+  helperText?: string;
+  options: SelectOption[];
+  placeholder?: string;
+}
+
+export interface CardProps {
+  children: React.ReactNode;
+  className?: string;
+  padding?: 'none' | 'sm' | 'md' | 'lg';
+  shadow?: 'none' | 'sm' | 'md' | 'lg';
+  rounded?: 'none' | 'sm' | 'md' | 'lg';
+  hover?: boolean;
+}
+
+// State Management Models
+export interface NavigationState {
+  isMenuOpen: boolean;
+  currentPath: string;
+}
+
+export interface AppState {
+  navigation: NavigationState;
+  loading: boolean;
+  error: string | null;
+}
+
+// Utility Types
+export type ExperienceLevel = 'beginner' | 'intermediate' | 'advanced';
+export type EventType = 'race' | 'training' | 'social';
+export type FormStatus = 'idle' | 'submitting' | 'success' | 'error';
+export type ProductCategory = 'apparel' | 'gear' | 'accessories' | 'nutrition';
+export type NewsCategory = 'race-results' | 'training-tips' | 'team-news' | 'events' | 'general';
+export type NewsStatus = 'draft' | 'published' | 'archived';
+
+// Constants
+export const EXPERIENCE_LEVELS: { value: ExperienceLevel; label: string }[] = [
+  { value: 'beginner', label: 'Beginner' },
+  { value: 'intermediate', label: 'Intermediate' },
+  { value: 'advanced', label: 'Advanced' }
+];
+
+export const EVENT_TYPES: { value: EventType; label: string }[] = [
+  { value: 'race', label: 'Race' },
+  { value: 'training', label: 'Training' },
+  { value: 'social', label: 'Social' }
+];
+
+export const PRODUCT_CATEGORIES: { value: ProductCategory; label: string }[] = [
+  { value: 'apparel', label: 'Apparel' },
+  { value: 'gear', label: 'Gear' },
+  { value: 'accessories', label: 'Accessories' },
+  { value: 'nutrition', label: 'Nutrition' }
+];
+
+export const NEWS_CATEGORIES: { value: NewsCategory; label: string }[] = [
+  { value: 'race-results', label: 'Race Results' },
+  { value: 'training-tips', label: 'Training Tips' },
+  { value: 'team-news', label: 'Team News' },
+  { value: 'events', label: 'Events' },
+  { value: 'general', label: 'General' }
+];
+
+export const NEWS_STATUSES: { value: NewsStatus; label: string }[] = [
+  { value: 'draft', label: 'Draft' },
+  { value: 'published', label: 'Published' },
+  { value: 'archived', label: 'Archived' }
+];
