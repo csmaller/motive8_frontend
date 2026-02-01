@@ -14,18 +14,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   useEffect(() => {
     // Check for existing session on app load
-    const token = localStorage.getItem('admin_token');
-    const userData = localStorage.getItem('admin_user');
-    
-    if (token && userData) {
-      try {
-        const parsedUser = JSON.parse(userData);
-        setUser(parsedUser);
-      } catch (error) {
-        console.error('Error parsing user data:', error);
-        localStorage.removeItem('admin_token');
-        localStorage.removeItem('admin_user');
+    try {
+      const token = localStorage.getItem('admin_token');
+      const userData = localStorage.getItem('admin_user');
+      
+      if (token && userData) {
+        try {
+          const parsedUser = JSON.parse(userData);
+          setUser(parsedUser);
+        } catch (error) {
+          console.error('Error parsing user data:', error);
+          localStorage.removeItem('admin_token');
+          localStorage.removeItem('admin_user');
+        }
       }
+    } catch (error) {
+      console.error('Error accessing localStorage:', error);
     }
     
     setIsLoading(false);

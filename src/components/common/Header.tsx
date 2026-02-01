@@ -35,18 +35,43 @@ const Header: React.FC = () => {
   // Handle scroll detection
   useEffect(() => {
     const handleScroll = () => {
-      const scrollTop = window.scrollY;
-      setIsScrolled(scrollTop > 50);
+      try {
+        const scrollTop = window.scrollY || document.documentElement.scrollTop || 0;
+        
+        // Use hysteresis to prevent jumping between states
+        // When scrolling down, switch at 50px
+        // When scrolling up, switch back at 30px
+        if (!isScrolled && scrollTop > 50) {
+          setIsScrolled(true);
+        } else if (isScrolled && scrollTop < 30) {
+          setIsScrolled(false);
+        }
+      } catch (error) {
+        console.warn('Scroll handler error:', error);
+      }
     };
 
-    window.addEventListener('scroll', handleScroll);
+    // Initial check
+    handleScroll();
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+  }, [isScrolled]); // Add isScrolled to dependencies
 
   // Handle page changes - scroll to top and reset nav state
   useEffect(() => {
     if (prevLocationRef.current !== location.pathname) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Only scroll if the page has loaded and we're not on initial load
+      if (prevLocationRef.current !== '') {
+        // Use a safer scroll method that doesn't break on refresh
+        try {
+          window.scrollTo({ top: 0, behavior: 'auto' });
+        } catch (error) {
+          // Fallback for older browsers or edge cases
+          window.scrollTo(0, 0);
+        }
+      }
+      
       prevLocationRef.current = location.pathname;
       
       // Use requestAnimationFrame to avoid synchronous state updates
