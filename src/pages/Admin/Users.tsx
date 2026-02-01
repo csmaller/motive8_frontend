@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { peopleApi } from '../../services/peopleApi';
-import type { UserWithPerson } from '../../types';
+import type { UserProfile } from '../../types';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import StatusMessage from '../../components/ui/StatusMessage';
 
 const AdminUsers: React.FC = () => {
-  const [users, setUsers] = useState<UserWithPerson[]>([]);
+  const [users, setUsers] = useState<UserProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -168,7 +168,7 @@ const AdminUsers: React.FC = () => {
                   </div>
                   
                   <div className="flex items-center space-x-4 text-sm text-gray-600 mb-3">
-                    <span>{user.person.email}</span>
+                    <span>{user.email}</span>
                     {user.person.phone && (
                       <>
                         <span>•</span>

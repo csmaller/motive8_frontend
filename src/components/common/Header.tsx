@@ -104,11 +104,11 @@ const Header: React.FC = () => {
       role="banner"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full">
-        <div className="flex justify-between items-center h-full">
+        <div className="flex items-center justify-center h-full gap-12">
           {/* Left Navigation */}
           <nav 
-            className={`hidden md:flex space-x-8 transition-all duration-300 ease-in-out ${
-              isScrolled ? 'space-x-4' : 'space-x-8'
+            className={`hidden md:flex space-x-6 transition-all duration-300 ease-in-out ${
+              isScrolled ? 'space-x-4' : 'space-x-6'
             }`} 
             role="navigation" 
             aria-label="Main navigation left"
@@ -132,7 +132,7 @@ const Header: React.FC = () => {
           </nav>
 
           {/* Mobile menu button (left side on mobile) */}
-          <div className="md:hidden">
+          <div className="md:hidden absolute left-4">
             <button
               ref={menuButtonRef}
               onClick={toggleMenu}
@@ -199,8 +199,8 @@ const Header: React.FC = () => {
 
           {/* Right Navigation */}
           <nav 
-            className={`hidden md:flex space-x-8 transition-all duration-300 ease-in-out ${
-              isScrolled ? 'space-x-4' : 'space-x-8'
+            className={`hidden md:flex space-x-6 transition-all duration-300 ease-in-out ${
+              isScrolled ? 'space-x-4' : 'space-x-6'
             }`} 
             role="navigation" 
             aria-label="Main navigation right"
@@ -224,7 +224,7 @@ const Header: React.FC = () => {
           </nav>
 
           {/* Right spacer for mobile to balance layout */}
-          <div className="md:hidden w-10"></div>
+          <div className="md:hidden w-10 absolute right-4"></div>
         </div>
       </div>
 

@@ -101,41 +101,83 @@ export interface NewsArticle {
 }
 
 // User Management Models
+
+/**
+ * Base Person interface - represents personal information
+ * This maps to the 'person' table in the database
+ */
 export interface Person {
   id: string;
   firstName: string;
   lastName: string;
-  email: string;
   phone?: string;
   image?: string;
-  specializations?: string[]; // For coaches
+  specializations?: string[]; // For coaches - their areas of expertise
   createdAt: Date;
   updatedAt: Date;
 }
 
+/**
+ * User interface - represents authentication and account information
+ * This maps to the 'user' table in the database
+ */
 export interface User {
   id: string;
-  personId: string;
+  personId: string; // Foreign key to Person
   username: string;
   email: string;
   lastLogin?: Date;
   createdAt: Date;
   updatedAt: Date;
-  // Joined data from Person table
-  person?: Person;
 }
 
-export interface UserWithPerson extends User {
+/**
+ * Combined User with Person data - used for display and management
+ * This represents a JOIN between user and person tables
+ */
+export interface UserProfile extends User {
   person: Person;
 }
 
-export interface CoachWithPerson extends UserWithPerson {
-  // Additional coach-specific fields that might come from a separate coaches table
-  title?: string;
-  bio?: string;
-  certifications?: string[];
-  yearsExperience?: number;
+/**
+ * Computed properties for user display
+ */
+export interface UserDisplayInfo {
+  fullName: string;
+  initials: string;
+  isCoach: boolean;
+  isAdmin: boolean;
+}
+
+/**
+ * Helper type for creating new users
+ */
+export interface CreateUserData {
+  // Person data
+  firstName: string;
+  lastName: string;
+  phone?: string;
   image?: string;
+  specializations?: string[];
+  // User data
+  username: string;
+  email: string;
+  password: string;
+}
+
+/**
+ * Helper type for updating users
+ */
+export interface UpdateUserData {
+  // Person data
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  image?: string;
+  specializations?: string[];
+  // User data
+  email?: string;
+  password?: string;
 }
 
 // Page Content Model
@@ -280,3 +322,30 @@ export const NEWS_STATUSES: { value: NewsStatus; label: string }[] = [
   { value: 'published', label: 'Published' },
   { value: 'archived', label: 'Archived' }
 ];
+
+// User/Person Utility Functions
+export const getUserDisplayInfo = (userProfile: UserProfile): UserDisplayInfo => {
+  const fullName = `${userProfile.person.firstName} ${userProfile.person.lastName}`;
+  const initials = `${userProfile.person.firstName[0]}${userProfile.person.lastName[0]}`;
+  const isCoach = userProfile.person.specializations && userProfile.person.specializations.length > 0;
+  const isAdmin = userProfile.email === 'admin@m8team.com' || userProfile.email.endsWith('@m8team.com');
+  
+  return {
+    fullName,
+    initials,
+    isCoach: !!isCoach,
+    isAdmin
+  };
+};
+
+export const isUserCoach = (userProfile: UserProfile): boolean => {
+  return !!(userProfile.person.specializations && userProfile.person.specializations.length > 0);
+};
+
+export const isUserAdmin = (userProfile: UserProfile): boolean => {
+  return userProfile.email === 'admin@m8team.com' || userProfile.email.endsWith('@m8team.com');
+};
+
+// Type aliases for backward compatibility (deprecated - use UserProfile instead)
+/** @deprecated Use UserProfile instead */
+export type UserWithPerson = UserProfile;

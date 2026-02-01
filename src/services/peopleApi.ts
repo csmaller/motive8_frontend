@@ -1,4 +1,4 @@
-import type {  UserWithPerson } from '../types';
+import type { UserProfile, CreateUserData, UpdateUserData } from '../types';
 
 const API_BASE_URL = 'http://127.0.0.1:8000/api';
 
@@ -23,34 +23,59 @@ interface ApiPersonResponse {
   specializations?: string[];
 }
 
-export interface CreateUserRequest {
-  // Person data
-  firstName: string;
-  lastName: string;
-  phone?: string;
-  image?: string;
-  specializations?: string[]; // For coaches
-  // User data
-  username: string;
-  email: string;
-  password: string;
-}
-
-export interface UpdateUserRequest {
-  // Person data
-  firstName?: string;
-  lastName?: string;
-  phone?: string;
-  image?: string;
-  specializations?: string[]; // For coaches
-  // User data
-  email?: string;
-  password?: string;
-}
+// Export types for use in other files
+export type { CreateUserData, UpdateUserData } from '../types';
 
 export const peopleApi = {
+  // Get all coaches (users with specializations)
+  getCoaches: async (): Promise<UserProfile[]> => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/coaches`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      // Transform the API response to match our interface
+      return data.map((item: ApiPersonResponse) => ({
+        id: item.id || item.user_id || '',
+        personId: item.person_id || item.id || '',
+        username: item.username || '',
+        email: item.email || '',
+        createdAt: new Date(item.created_at || item.createdAt || Date.now()),
+        updatedAt: new Date(item.updated_at || item.updatedAt || Date.now()),
+        lastLogin: item.last_login ? new Date(item.last_login) : undefined,
+        person: {
+          id: item.person_id || item.id || '',
+          firstName: item.first_name || item.firstName || '',
+          lastName: item.last_name || item.lastName || '',
+          phone: item.phone,
+          image: item.image,
+          specializations: item.specializations || [],
+          createdAt: new Date(item.created_at || item.createdAt || Date.now()),
+          updatedAt: new Date(item.updated_at || item.updatedAt || Date.now()),
+        }
+      }));
+    } catch (error) {
+      console.error('Failed to fetch coaches from API:', error);
+      console.log('Falling back to mock data...');
+      // Return mock coaches as fallback (filter mock users with specializations)
+      return getMockUsers().filter(user => 
+        user.person.specializations && user.person.specializations.length > 0
+      );
+    }
+  },
+
   // Get all users with person data
-  getAll: async (): Promise<UserWithPerson[]> => {
+  getAll: async (): Promise<UserProfile[]> => {
     try {
       const response = await fetch(`${API_BASE_URL}/people`, {
         method: 'GET',
@@ -79,7 +104,6 @@ export const peopleApi = {
           id: item.person_id || item.id || '',
           firstName: item.first_name || item.firstName || '',
           lastName: item.last_name || item.lastName || '',
-          email: item.email || '', // Email comes from user table
           phone: item.phone,
           image: item.image,
           specializations: item.specializations || [],
@@ -96,7 +120,7 @@ export const peopleApi = {
   },
 
   // Get user by ID with person data
-  getById: async (id: string): Promise<UserWithPerson> => {
+  getById: async (id: string): Promise<UserProfile> => {
     try {
       const response = await fetch(`${API_BASE_URL}/people/${id}`, {
         method: 'GET',
@@ -125,7 +149,6 @@ export const peopleApi = {
           id: item.person_id || item.id || '',
           firstName: item.first_name || item.firstName || '',
           lastName: item.last_name || item.lastName || '',
-          email: item.email || '', // Email comes from user table
           phone: item.phone,
           image: item.image,
           specializations: item.specializations || [],
@@ -144,7 +167,7 @@ export const peopleApi = {
   },
 
   // Create new user (creates both person and user records)
-  create: async (userData: CreateUserRequest): Promise<UserWithPerson> => {
+  create: async (userData: CreateUserData): Promise<UserProfile> => {
     try {
       // Transform our interface to match API expectations
       const apiData = {
@@ -187,7 +210,6 @@ export const peopleApi = {
           id: item.person_id || item.id || '',
           firstName: item.first_name || item.firstName || '',
           lastName: item.last_name || item.lastName || '',
-          email: item.email || '', // Email comes from user table
           phone: item.phone,
           image: item.image,
           specializations: item.specializations || [],
@@ -199,7 +221,7 @@ export const peopleApi = {
       console.error('Failed to create person via API:', error);
       console.log('Falling back to mock creation...');
       // Mock creation for development
-      const newUser: UserWithPerson = {
+      const newUser: UserProfile = {
         id: Date.now().toString(),
         personId: (Date.now() + 1).toString(),
         username: userData.username,
@@ -210,7 +232,6 @@ export const peopleApi = {
           id: (Date.now() + 1).toString(),
           firstName: userData.firstName,
           lastName: userData.lastName,
-          email: userData.email,
           phone: userData.phone,
           image: userData.image,
           specializations: userData.specializations || [],
@@ -223,7 +244,7 @@ export const peopleApi = {
   },
 
   // Update user (updates both person and user records)
-  update: async (id: string, userData: UpdateUserRequest): Promise<UserWithPerson> => {
+  update: async (id: string, userData: UpdateUserData): Promise<UserProfile> => {
     try {
       // Transform our interface to match API expectations
       const apiData = {
@@ -265,7 +286,6 @@ export const peopleApi = {
           id: item.person_id || item.id || '',
           firstName: item.first_name || item.firstName || '',
           lastName: item.last_name || item.lastName || '',
-          email: item.email || '', // Email comes from user table
           phone: item.phone,
           image: item.image,
           specializations: item.specializations || [],
@@ -289,7 +309,6 @@ export const peopleApi = {
           ...existingUser.person,
           firstName: userData.firstName || existingUser.person.firstName,
           lastName: userData.lastName || existingUser.person.lastName,
-          email: userData.email || existingUser.person.email,
           phone: userData.phone || existingUser.person.phone,
           image: userData.image || existingUser.person.image,
           specializations: userData.specializations || existingUser.person.specializations,
@@ -318,6 +337,46 @@ export const peopleApi = {
       console.log('Falling back to mock deletion...');
       // Mock deletion for development - just log it
       console.log('Mock: Person deleted:', id);
+    }
+  },
+
+  // Test connection to coaches endpoint
+  testCoachesConnection: async (): Promise<{ connected: boolean; latency?: number; error?: string; count?: number }> => {
+    const startTime = Date.now();
+    
+    try {
+      const response = await fetch(`${API_BASE_URL}/coaches`, {
+        method: 'HEAD',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+        },
+        signal: AbortSignal.timeout(3000),
+      });
+
+      const latency = Date.now() - startTime;
+
+      if (response.ok) {
+        // Try to get count from headers if available
+        const countHeader = response.headers.get('X-Total-Count');
+        return {
+          connected: true,
+          latency,
+          count: countHeader ? parseInt(countHeader, 10) : undefined
+        };
+      } else {
+        return {
+          connected: false,
+          latency,
+          error: `HTTP ${response.status}`
+        };
+      }
+    } catch (error) {
+      const latency = Date.now() - startTime;
+      return {
+        connected: false,
+        latency,
+        error: error instanceof Error ? error.message : 'Connection failed'
+      };
     }
   },
 
@@ -363,7 +422,7 @@ export const peopleApi = {
 };
 
 // Mock data for development
-function getMockUsers(): UserWithPerson[] {
+function getMockUsers(): UserProfile[] {
   return [
     {
       id: '1',
@@ -377,7 +436,6 @@ function getMockUsers(): UserWithPerson[] {
         id: '1',
         firstName: 'Admin',
         lastName: 'User',
-        email: 'admin@m8team.com',
         phone: '+1-555-0001',
         image: '/src/assets/img/dummy/mark_headshot.png',
         specializations: [],
@@ -397,7 +455,6 @@ function getMockUsers(): UserWithPerson[] {
         id: '2',
         firstName: 'Sarah',
         lastName: 'Johnson',
-        email: 'sarah@m8team.com',
         phone: '+1-555-0002',
         image: '/src/assets/img/dummy/mark_headshot.png',
         specializations: ['Swimming', 'Triathlon Training'],
@@ -417,7 +474,6 @@ function getMockUsers(): UserWithPerson[] {
         id: '3',
         firstName: 'Mike',
         lastName: 'Rodriguez',
-        email: 'mike@m8team.com',
         phone: '+1-555-0003',
         image: '/src/assets/img/dummy/mark_headshot.png',
         specializations: ['Cycling', 'Running'],
@@ -437,7 +493,6 @@ function getMockUsers(): UserWithPerson[] {
         id: '4',
         firstName: 'John',
         lastName: 'Doe',
-        email: 'john.doe@email.com',
         phone: '+1-555-0004',
         image: '/src/assets/img/dummy/mark_headshot.png',
         specializations: [],
@@ -457,7 +512,6 @@ function getMockUsers(): UserWithPerson[] {
         id: '5',
         firstName: 'Jane',
         lastName: 'Smith',
-        email: 'jane.admin@m8team.com',
         phone: '+1-555-0005',
         image: '/src/assets/img/dummy/mark_headshot.png',
         specializations: [],

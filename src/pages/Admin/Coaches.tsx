@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { peopleApi } from '../../services/peopleApi';
-import type { UserWithPerson } from '../../types';
+import type { UserProfile } from '../../types';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import StatusMessage from '../../components/ui/StatusMessage';
+import markHeadshot from '../../assets/img/dummy/mark_headshot.png';
 
 const AdminCoaches: React.FC = () => {
-  const [coaches, setCoaches] = useState<UserWithPerson[]>([]);
+  const [coaches, setCoaches] = useState<UserProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -88,16 +89,33 @@ const AdminCoaches: React.FC = () => {
             <Card key={coach.id} className="h-full">
               <div className="space-y-4">
                 <div className="text-center">
-                  <div className="w-20 h-20 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full mx-auto mb-3 flex items-center justify-center">
-                    <span className="text-xl font-bold text-white">
-                      {coach.person.firstName[0]}{coach.person.lastName[0]}
-                    </span>
+                  <div className="w-20 h-20 mx-auto mb-3 overflow-hidden rounded-full">
+                    <img
+                      src={coach.person.image || markHeadshot}
+                      alt={`${coach.person.firstName} ${coach.person.lastName}`}
+                      className="w-full h-full object-cover rounded-full"
+                      onError={(e) => {
+                        // Fallback to initials if image fails to load
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent) {
+                          parent.innerHTML = `
+                            <div class="w-20 h-20 bg-gradient-to-br from-primary-400 to-primary-600 rounded-full flex items-center justify-center">
+                              <span class="text-xl font-bold text-white">
+                                ${coach.person.firstName[0]}${coach.person.lastName[0]}
+                              </span>
+                            </div>
+                          `;
+                        }
+                      }}
+                    />
                   </div>
                   <h3 className="text-lg font-semibold text-gray-900">
                     {coach.person.firstName} {coach.person.lastName}
                   </h3>
                   <p className="text-primary-600 font-medium">Coach</p>
-                  <p className="text-sm text-gray-500">{coach.person.email}</p>
+                  <p className="text-sm text-gray-500">{coach.email}</p>
                   {coach.person.phone && (
                     <p className="text-sm text-gray-500">{coach.person.phone}</p>
                   )}

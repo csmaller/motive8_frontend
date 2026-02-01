@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { peopleApi, type CreateUserRequest, type UpdateUserRequest } from '../../services/peopleApi';
+import { peopleApi, type CreateUserData, type UpdateUserData } from '../../services/peopleApi';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
@@ -116,7 +116,7 @@ const AdminCoachesEdit: React.FC = () => {
       };
 
       if (isEditing && id) {
-        await peopleApi.update(id, userData as UpdateUserRequest);
+        await peopleApi.update(id, userData as UpdateUserData);
         setSuccess('Coach updated successfully!');
       } else {
         // For new coaches, we need to provide default values for required fields
@@ -124,7 +124,7 @@ const AdminCoachesEdit: React.FC = () => {
           ...userData,
           username: userData.email.split('@')[0] // Generate username from email
         };
-        await peopleApi.create(createData as CreateUserRequest);
+        await peopleApi.create(createData as CreateUserData);
         setSuccess('Coach created successfully!');
         setTimeout(() => navigate('/admin/coaches'), 2000);
       }

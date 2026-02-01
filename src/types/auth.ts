@@ -1,7 +1,7 @@
-import type { UserWithPerson } from './index';
+import type { UserProfile } from './index';
 
 export interface AuthContextType {
-  user: UserWithPerson | null;
+  user: UserProfile | null;
   login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
   isLoading: boolean;

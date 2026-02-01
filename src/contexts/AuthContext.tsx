@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import type { AuthContextType } from '../types/auth';
-import type { UserWithPerson } from '../types';
+import type { UserProfile } from '../types';
 import { AuthContext } from './auth';
 
 interface AuthProviderProps {
@@ -9,7 +9,7 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<UserWithPerson | null>(null);
+  const [user, setUser] = useState<UserProfile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -55,7 +55,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       } else {
         // For demo purposes, allow login with demo credentials
         if (email === 'admin@m8team.com' && password === 'admin123') {
-          const mockUser: UserWithPerson = {
+          const mockUser: UserProfile = {
             id: '1',
             personId: '1',
             username: 'admin',
@@ -66,7 +66,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
               id: '1',
               firstName: 'Admin',
               lastName: 'User',
-              email: 'admin@m8team.com',
               phone: '+1-555-0001',
               createdAt: new Date(),
               updatedAt: new Date(),
@@ -85,7 +84,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       // Fallback for demo - allow login with demo credentials
       if (email === 'admin@m8team.com' && password === 'admin123') {
-        const mockUser: UserWithPerson = {
+        const mockUser: UserProfile = {
           id: '1',
           personId: '1',
           username: 'admin',
@@ -96,7 +95,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             id: '1',
             firstName: 'Admin',
             lastName: 'User',
-            email: 'admin@m8team.com',
             phone: '+1-555-0001',
             createdAt: new Date(),
             updatedAt: new Date(),

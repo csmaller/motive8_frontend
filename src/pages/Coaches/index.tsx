@@ -3,18 +3,18 @@ import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import { peopleApi } from '../../services/peopleApi';
-import type { UserWithPerson } from '../../types';
+import type { UserProfile } from '../../types';
 import markHeadshot from '../../assets/img/dummy/mark_headshot.png';
 
 const Coaches: React.FC = () => {
-  const [coaches, setCoaches] = useState<UserWithPerson[]>([]);
+  const [coaches, setCoaches] = useState<UserProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const loadCoaches = async () => {
       try {
-        const allUsers = await peopleApi.getAll();
-        setCoaches(allUsers);
+        const coaches = await peopleApi.getCoaches();
+        setCoaches(coaches);
       } catch (error) {
         console.error('Failed to load coaches:', error);
       } finally {
@@ -35,7 +35,7 @@ const Coaches: React.FC = () => {
     );
   }
 
-  const CoachCard: React.FC<{ coach: UserWithPerson }> = ({ coach }) => (
+  const CoachCard: React.FC<{ coach: UserProfile }> = ({ coach }) => (
     <Card hover={true} className="h-full">
       <div className="text-center mb-6">
         {/* Coach headshot image */}
@@ -44,6 +44,11 @@ const Coaches: React.FC = () => {
             src={coach.person.image || markHeadshot}
             alt={`${coach.person.firstName} ${coach.person.lastName} - Triathlon Coach`}
             className="w-full h-full object-cover rounded-full"
+            onError={(e) => {
+              // Fallback to default headshot if uploaded image fails to load
+              const target = e.target as HTMLImageElement;
+              target.src = markHeadshot;
+            }}
           />
         </div>
         <h3 className="text-xl font-bold text-gray-900 mb-1">

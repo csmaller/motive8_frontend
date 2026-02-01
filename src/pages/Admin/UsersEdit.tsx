@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { peopleApi, type CreateUserRequest, type UpdateUserRequest } from '../../services/peopleApi';
+import { peopleApi, type CreateUserData, type UpdateUserData } from '../../services/peopleApi';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
@@ -100,7 +100,7 @@ const AdminUsersEdit: React.FC = () => {
       };
 
       if (isEditing && id) {
-        await peopleApi.update(id, userData as UpdateUserRequest);
+        await peopleApi.update(id, userData as UpdateUserData);
         setSuccess('User updated successfully!');
       } else {
         // For new users, we need to provide default values for required fields
@@ -110,7 +110,7 @@ const AdminUsersEdit: React.FC = () => {
           role: 'member' as const,
           status: 'active' as const
         };
-        await peopleApi.create(createData as CreateUserRequest);
+        await peopleApi.create(createData as CreateUserData);
         setSuccess('User created successfully!');
         setTimeout(() => navigate('/admin/users'), 2000);
       }
