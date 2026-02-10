@@ -362,22 +362,35 @@ export const newsApi = {
 
       const data = await response.json();
       
-      return data.map((item: Record<string, unknown>) => ({
-        id: item.id || item.article_id,
-        title: item.title,
-        slug: item.slug,
-        excerpt: item.excerpt,
-        content: item.content,
-        author: item.author,
-        publishedAt: new Date(item.published_at as string || item.publishedAt as string),
-        updatedAt: new Date(item.updated_at as string || item.updatedAt as string),
-        status: item.status,
-        category: item.category,
-        featuredImage: item.featured_image || item.featuredImage,
-        tags: item.tags || [],
-        featured: item.featured || false,
-        readTime: item.read_time || item.readTime || 5,
-      }));
+      return data.map((item: Record<string, unknown>) => {
+        // Handle author - could be string or object
+        let authorName = 'Unknown';
+        if (typeof item.author === 'string') {
+          authorName = item.author;
+        } else if (item.author && typeof item.author === 'object') {
+          const authorObj = item.author as Record<string, unknown>;
+          const firstName = authorObj.first_name || authorObj.firstName || '';
+          const lastName = authorObj.last_name || authorObj.lastName || '';
+          authorName = `${firstName} ${lastName}`.trim() || 'Unknown';
+        }
+        
+        return {
+          id: item.id || item.article_id,
+          title: item.title,
+          slug: item.slug,
+          excerpt: item.excerpt,
+          content: item.content,
+          author: authorName,
+          publishedAt: new Date(item.published_at as string || item.publishedAt as string),
+          updatedAt: new Date(item.updated_at as string || item.updatedAt as string),
+          status: item.status,
+          category: item.category,
+          featuredImage: item.featured_image || item.featuredImage,
+          tags: item.tags || [],
+          featured: item.featured || false,
+          readTime: item.read_time || item.readTime || 5,
+        };
+      });
     } catch (error) {
       console.error('Failed to fetch news from API:', error);
       console.log('Falling back to mock data...');
@@ -402,13 +415,24 @@ export const newsApi = {
 
       const item = await response.json();
       
+      // Handle author - could be string or object
+      let authorName = 'Unknown';
+      if (typeof item.author === 'string') {
+        authorName = item.author;
+      } else if (item.author && typeof item.author === 'object') {
+        const authorObj = item.author as Record<string, unknown>;
+        const firstName = authorObj.first_name || authorObj.firstName || '';
+        const lastName = authorObj.last_name || authorObj.lastName || '';
+        authorName = `${firstName} ${lastName}`.trim() || 'Unknown';
+      }
+      
       return {
         id: item.id || item.article_id,
         title: item.title,
         slug: item.slug,
         excerpt: item.excerpt,
         content: item.content,
-        author: item.author,
+        author: authorName,
         publishedAt: new Date(item.published_at || item.publishedAt),
         updatedAt: new Date(item.updated_at || item.updatedAt),
         status: item.status,
