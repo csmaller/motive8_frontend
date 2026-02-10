@@ -21,6 +21,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (token && userData) {
         try {
           const parsedUser = JSON.parse(userData);
+          console.log(parsedUser)
           setUser(parsedUser);
         } catch (error) {
           console.error('Error parsing user data:', error);
@@ -57,60 +58,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUser(userData);
         return true;
       } else {
-        // For demo purposes, allow login with demo credentials
-        if (email === 'admin@m8team.com' && password === 'admin123') {
-          const mockUser: UserProfile = {
-            id: '1',
-            personId: '1',
-            username: 'admin',
-            email: 'admin@m8team.com',
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            person: {
-              id: '1',
-              firstName: 'Admin',
-              lastName: 'User',
-              phone: '+1-555-0001',
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            }
-          };
-          
-          localStorage.setItem('admin_token', 'mock_token_123');
-          localStorage.setItem('admin_user', JSON.stringify(mockUser));
-          setUser(mockUser);
-          return true;
-        }
         return false;
       }
     } catch (error) {
       console.error('Login error:', error);
-      
-      // Fallback for demo - allow login with demo credentials
-      if (email === 'admin@m8team.com' && password === 'admin123') {
-        const mockUser: UserProfile = {
-          id: '1',
-          personId: '1',
-          username: 'admin',
-          email: 'admin@m8team.com',
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          person: {
-            id: '1',
-            firstName: 'Admin',
-            lastName: 'User',
-            phone: '+1-555-0001',
-            createdAt: new Date(),
-            updatedAt: new Date(),
-          }
-        };
-        
-        localStorage.setItem('admin_token', 'mock_token_123');
-        localStorage.setItem('admin_user', JSON.stringify(mockUser));
-        setUser(mockUser);
-        return true;
-      }
-      
       return false;
     } finally {
       setIsLoading(false);
@@ -129,7 +80,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     logout,
     isLoading,
     isAuthenticated: !!user,
-    isSuperAdmin: user?.email === 'admin@m8team.com', // Check if user is admin by email
+    isSuperAdmin: user?.user_type === 'admin'
   };
 
   return (

@@ -103,7 +103,14 @@ function App() {
                 </AdminLayout>
               </ProtectedRoute>
             } />
-            <Route path="/admin/events/:id" element={
+            <Route path="/admin/events/new" element={
+              <ProtectedRoute requireSuperAdmin={true}>
+                <AdminLayout>
+                  <AdminEventsEdit />
+                </AdminLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/events/:id/edit" element={
               <ProtectedRoute requireSuperAdmin={true}>
                 <AdminLayout>
                   <AdminEventsEdit />
@@ -114,6 +121,20 @@ function App() {
               <ProtectedRoute requireSuperAdmin={true}>
                 <AdminLayout>
                   <AdminNews />
+                </AdminLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/news/new" element={
+              <ProtectedRoute requireSuperAdmin={true}>
+                <AdminLayout>
+                  <AdminNewsEdit />
+                </AdminLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/news/:id/edit" element={
+              <ProtectedRoute requireSuperAdmin={true}>
+                <AdminLayout>
+                  <AdminNewsEdit />
                 </AdminLayout>
               </ProtectedRoute>
             } />
@@ -135,20 +156,6 @@ function App() {
               <ProtectedRoute requireSuperAdmin={true}>
                 <AdminLayout>
                   <AdminUsersEdit />
-                </AdminLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/news/:id" element={
-              <ProtectedRoute requireSuperAdmin={true}>
-                <AdminLayout>
-                  <AdminNewsEdit />
-                </AdminLayout>
-              </ProtectedRoute>
-            } />
-            <Route path="/admin/news/:id/edit" element={
-              <ProtectedRoute requireSuperAdmin={true}>
-                <AdminLayout>
-                  <AdminNewsEdit />
                 </AdminLayout>
               </ProtectedRoute>
             } />

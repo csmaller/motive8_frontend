@@ -128,6 +128,7 @@ export interface User {
   email: string;
   lastLogin?: Date;
   createdAt: Date;
+  user_type:string;
   updatedAt: Date;
 }
 
