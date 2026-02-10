@@ -461,6 +461,10 @@ export const newsApi = {
         if (contentType && contentType.includes('application/json')) {
           const errorData = await response.json().catch(() => ({}));
           errorMessage = `HTTP ${response.status}: ${errorData.message || response.statusText}`;
+        } else {
+          // Log the actual response for debugging
+          const textResponse = await response.text();
+          console.error('Non-JSON response from API:', textResponse.substring(0, 200));
         }
         
         throw new Error(errorMessage);
@@ -528,6 +532,9 @@ export const newsApi = {
         if (contentType && contentType.includes('application/json')) {
           const errorData = await response.json().catch(() => ({}));
           errorMessage = `HTTP ${response.status}: ${errorData.message || response.statusText}`;
+        } else {
+          const textResponse = await response.text();
+          console.error('Non-JSON response from API:', textResponse.substring(0, 200));
         }
         
         throw new Error(errorMessage);
