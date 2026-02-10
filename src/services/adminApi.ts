@@ -363,15 +363,24 @@ export const newsApi = {
       const data = await response.json();
       
       return data.map((item: Record<string, unknown>) => {
-        // Handle author - could be string or object
+        // Handle author - extract name from nested person object
         let authorName = 'Unknown';
         if (typeof item.author === 'string') {
           authorName = item.author;
         } else if (item.author && typeof item.author === 'object') {
           const authorObj = item.author as Record<string, unknown>;
-          const firstName = authorObj.first_name || authorObj.firstName || '';
-          const lastName = authorObj.last_name || authorObj.lastName || '';
-          authorName = `${firstName} ${lastName}`.trim() || 'Unknown';
+          // Check for nested person object
+          if (authorObj.person && typeof authorObj.person === 'object') {
+            const personObj = authorObj.person as Record<string, unknown>;
+            const firstName = personObj.first_name || '';
+            const lastName = personObj.last_name || '';
+            authorName = `${firstName} ${lastName}`.trim() || 'Unknown';
+          } else {
+            // Fallback to direct first_name/last_name on author object
+            const firstName = authorObj.first_name || authorObj.firstName || '';
+            const lastName = authorObj.last_name || authorObj.lastName || '';
+            authorName = `${firstName} ${lastName}`.trim() || 'Unknown';
+          }
         }
         
         return {
@@ -415,15 +424,13 @@ export const newsApi = {
 
       const item = await response.json();
       
-      // Handle author - could be string or object
-      let authorName = 'Unknown';
+      // Handle author - extract ID from nested object structure
+      let authorId = '';
       if (typeof item.author === 'string') {
-        authorName = item.author;
+        authorId = item.author; // Fallback
       } else if (item.author && typeof item.author === 'object') {
         const authorObj = item.author as Record<string, unknown>;
-        const firstName = authorObj.first_name || authorObj.firstName || '';
-        const lastName = authorObj.last_name || authorObj.lastName || '';
-        authorName = `${firstName} ${lastName}`.trim() || 'Unknown';
+        authorId = String(authorObj.id || '');
       }
       
       return {
@@ -432,7 +439,7 @@ export const newsApi = {
         slug: item.slug,
         excerpt: item.excerpt,
         content: item.content,
-        author: authorName,
+        author: authorId, // Store ID for editing
         publishedAt: new Date(item.published_at || item.publishedAt),
         updatedAt: new Date(item.updated_at || item.updatedAt),
         status: item.status,
