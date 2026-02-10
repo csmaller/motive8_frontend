@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { eventsApi } from '../../services/adminApi';
@@ -57,13 +57,7 @@ const AdminEventsEdit: React.FC = () => {
 
   const watchRegistrationRequired = watch('registrationRequired');
 
-  useEffect(() => {
-    if (isEditing && id) {
-      loadEvent(id);
-    }
-  }, [id, isEditing]);
-
-  const loadEvent = async (eventId: string) => {
+  const loadEvent = useCallback(async (eventId: string) => {
     try {
       setIsLoading(true);
       const event = await eventsApi.getById(eventId);
@@ -93,7 +87,13 @@ const AdminEventsEdit: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [reset]);
+
+  useEffect(() => {
+    if (isEditing && id) {
+      loadEvent(id);
+    }
+  }, [id, isEditing, loadEvent]);
 
   const onSubmit = async (data: EventFormData) => {
     try {

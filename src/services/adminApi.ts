@@ -60,11 +60,11 @@ export const eventsApi = {
       const data = await response.json();
       
       // Transform API response to match our interface
-      return data.map((item: any) => ({
+      return data.map((item: Record<string, unknown>) => ({
         id: item.id || item.event_id,
         title: item.title,
         description: item.description,
-        date: new Date(item.date),
+        date: new Date(item.date as string),
         time: item.time,
         location: item.location,
         type: item.type,
@@ -72,7 +72,7 @@ export const eventsApi = {
         registrationRequired: item.registration_required ?? item.registrationRequired,
         maxParticipants: item.max_participants ?? item.maxParticipants,
         currentParticipants: item.current_participants ?? item.currentParticipants,
-        registrationDeadline: item.registration_deadline ? new Date(item.registration_deadline) : undefined,
+        registrationDeadline: item.registration_deadline ? new Date(item.registration_deadline as string) : undefined,
         imageUrl: item.image_url ?? item.imageUrl,
       }));
     } catch (error) {
@@ -188,7 +188,7 @@ export const eventsApi = {
   update: async (id: string, event: Partial<Event>): Promise<Event> => {
     try {
       // Transform to API format
-      const apiData: any = {};
+      const apiData: Record<string, unknown> = {};
       if (event.title !== undefined) apiData.title = event.title;
       if (event.description !== undefined) apiData.description = event.description;
       if (event.date !== undefined) {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { newsApi } from '../../services/adminApi';
@@ -58,26 +58,7 @@ const AdminNewsEdit: React.FC = () => {
 
   const watchTitle = watch('title');
 
-  // Auto-generate slug from title
-  useEffect(() => {
-    if (watchTitle && !isEditing) {
-      const slug = watchTitle
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, '')
-        .replace(/\s+/g, '-')
-        .replace(/-+/g, '-')
-        .trim();
-      setValue('slug', slug);
-    }
-  }, [watchTitle, setValue, isEditing]);
-
-  useEffect(() => {
-    if (isEditing && id) {
-      loadArticle(id);
-    }
-  }, [id, isEditing]);
-
-  const loadArticle = async (articleId: string) => {
+  const loadArticle = useCallback(async (articleId: string) => {
     try {
       setIsLoading(true);
       const article = await newsApi.getById(articleId);
@@ -100,7 +81,26 @@ const AdminNewsEdit: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [reset]);
+
+  // Auto-generate slug from title
+  useEffect(() => {
+    if (watchTitle && !isEditing) {
+      const slug = watchTitle
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, '')
+        .replace(/\s+/g, '-')
+        .replace(/-+/g, '-')
+        .trim();
+      setValue('slug', slug);
+    }
+  }, [watchTitle, setValue, isEditing]);
+
+  useEffect(() => {
+    if (isEditing && id) {
+      loadArticle(id);
+    }
+  }, [id, isEditing, loadArticle]);
 
   const onSubmit = async (data: NewsFormData) => {
     try {
