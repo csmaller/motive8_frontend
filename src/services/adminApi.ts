@@ -454,8 +454,16 @@ export const newsApi = {
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(`HTTP ${response.status}: ${errorData.message || response.statusText}`);
+        // Check if response is JSON before trying to parse
+        const contentType = response.headers.get('content-type');
+        let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await response.json().catch(() => ({}));
+          errorMessage = `HTTP ${response.status}: ${errorData.message || response.statusText}`;
+        }
+        
+        throw new Error(errorMessage);
       }
 
       const item = await response.json();
@@ -514,8 +522,15 @@ export const newsApi = {
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(`HTTP ${response.status}: ${errorData.message || response.statusText}`);
+        const contentType = response.headers.get('content-type');
+        let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await response.json().catch(() => ({}));
+          errorMessage = `HTTP ${response.status}: ${errorData.message || response.statusText}`;
+        }
+        
+        throw new Error(errorMessage);
       }
 
       const item = await response.json();
