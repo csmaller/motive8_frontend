@@ -1,12 +1,61 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import HealthCheck from '../../components/admin/HealthCheck';
+import LoadingSpinner from '../../components/ui/LoadingSpinner';
+import { peopleApi } from '../../services/peopleApi';
+import { eventsApi, newsApi, productsApi, velocityClassesApi } from '../../services/adminApi';
 
 const AdminDashboard: React.FC = () => {
   const { user, logout } = useAuth();
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    activeCoaches: 0,
+    newsArticles: 0,
+    upcomingEvents: 0,
+    storeProducts: 0,
+    velocityClasses: 0
+  });
+  const [isLoadingStats, setIsLoadingStats] = useState(true);
+
+  useEffect(() => {
+    loadStats();
+  }, []);
+
+  const loadStats = async () => {
+    try {
+      setIsLoadingStats(true);
+      
+      // Fetch all data in parallel
+      const [users, coaches, news, events, products, classes] = await Promise.all([
+        peopleApi.getAll().catch(() => []),
+        peopleApi.getCoaches().catch(() => []),
+        newsApi.getAll().catch(() => []),
+        eventsApi.getAll().catch(() => []),
+        productsApi.getAll().catch(() => []),
+        velocityClassesApi.getAll().catch(() => [])
+      ]);
+
+      // Calculate upcoming events (events in the future)
+      const now = new Date();
+      const upcomingEvents = events.filter(event => new Date(event.date) >= now);
+
+      setStats({
+        totalUsers: users.length,
+        activeCoaches: coaches.length,
+        newsArticles: news.length,
+        upcomingEvents: upcomingEvents.length,
+        storeProducts: products.length,
+        velocityClasses: classes.length
+      });
+    } catch (error) {
+      console.error('Failed to load dashboard stats:', error);
+    } finally {
+      setIsLoadingStats(false);
+    }
+  };
 
   const adminSections = [
     {
@@ -95,30 +144,38 @@ const AdminDashboard: React.FC = () => {
 
         {/* Quick Stats */}
         <div className="grid grid-cols-1 md:grid-cols-6 gap-6">
-          <Card className="text-center">
-            <div className="text-2xl font-bold text-indigo-600">5</div>
-            <div className="text-sm text-gray-600">Total Users</div>
-          </Card>
-          <Card className="text-center">
-            <div className="text-2xl font-bold text-blue-600">4</div>
-            <div className="text-sm text-gray-600">Active Coaches</div>
-          </Card>
-          <Card className="text-center">
-            <div className="text-2xl font-bold text-purple-600">5</div>
-            <div className="text-sm text-gray-600">News Articles</div>
-          </Card>
-          <Card className="text-center">
-            <div className="text-2xl font-bold text-green-600">5</div>
-            <div className="text-sm text-gray-600">Upcoming Events</div>
-          </Card>
-          <Card className="text-center">
-            <div className="text-2xl font-bold text-orange-600">8</div>
-            <div className="text-sm text-gray-600">Store Products</div>
-          </Card>
-          <Card className="text-center">
-            <div className="text-2xl font-bold text-red-600">4</div>
-            <div className="text-sm text-gray-600">Velocity Classes</div>
-          </Card>
+          {isLoadingStats ? (
+            <div className="col-span-6 flex justify-center py-8">
+              <LoadingSpinner size="lg" />
+            </div>
+          ) : (
+            <>
+              <Card className="text-center">
+                <div className="text-2xl font-bold text-indigo-600">{stats.totalUsers}</div>
+                <div className="text-sm text-gray-600">Total Users</div>
+              </Card>
+              <Card className="text-center">
+                <div className="text-2xl font-bold text-blue-600">{stats.activeCoaches}</div>
+                <div className="text-sm text-gray-600">Active Coaches</div>
+              </Card>
+              <Card className="text-center">
+                <div className="text-2xl font-bold text-purple-600">{stats.newsArticles}</div>
+                <div className="text-sm text-gray-600">News Articles</div>
+              </Card>
+              <Card className="text-center">
+                <div className="text-2xl font-bold text-green-600">{stats.upcomingEvents}</div>
+                <div className="text-sm text-gray-600">Upcoming Events</div>
+              </Card>
+              <Card className="text-center">
+                <div className="text-2xl font-bold text-orange-600">{stats.storeProducts}</div>
+                <div className="text-sm text-gray-600">Store Products</div>
+              </Card>
+              <Card className="text-center">
+                <div className="text-2xl font-bold text-red-600">{stats.velocityClasses}</div>
+                <div className="text-sm text-gray-600">Velocity Classes</div>
+              </Card>
+            </>
+          )}
         </div>
 
         {/* Admin Sections */}
