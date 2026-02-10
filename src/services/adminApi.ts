@@ -73,6 +73,7 @@ export const eventsApi = {
         maxParticipants: item.max_participants ?? item.maxParticipants,
         currentParticipants: item.current_participants ?? item.currentParticipants,
         registrationDeadline: item.registration_deadline ? new Date(item.registration_deadline) : undefined,
+        imageUrl: item.image_url ?? item.imageUrl,
       }));
     } catch (error) {
       console.error('Failed to fetch events from API:', error);
@@ -111,6 +112,7 @@ export const eventsApi = {
         maxParticipants: item.max_participants ?? item.maxParticipants,
         currentParticipants: item.current_participants ?? item.currentParticipants,
         registrationDeadline: item.registration_deadline ? new Date(item.registration_deadline) : undefined,
+        imageUrl: item.image_url ?? item.imageUrl,
       };
     } catch (error) {
       console.error('Failed to fetch event from API:', error);
@@ -137,6 +139,7 @@ export const eventsApi = {
         max_participants: event.maxParticipants,
         current_participants: event.currentParticipants || 0,
         registration_deadline: event.registrationDeadline instanceof Date ? event.registrationDeadline.toISOString().split('T')[0] : event.registrationDeadline,
+        image_url: event.imageUrl,
       };
 
       const response = await fetch(`${API_BASE_URL}/events`, {
@@ -168,6 +171,7 @@ export const eventsApi = {
         maxParticipants: item.max_participants ?? item.maxParticipants,
         currentParticipants: item.current_participants ?? item.currentParticipants,
         registrationDeadline: item.registration_deadline ? new Date(item.registration_deadline) : undefined,
+        imageUrl: item.image_url ?? item.imageUrl,
       };
     } catch (error) {
       console.error('Failed to create event via API:', error);
@@ -200,6 +204,7 @@ export const eventsApi = {
       if (event.registrationDeadline !== undefined) {
         apiData.registration_deadline = event.registrationDeadline instanceof Date ? event.registrationDeadline.toISOString().split('T')[0] : event.registrationDeadline;
       }
+      if (event.imageUrl !== undefined) apiData.image_url = event.imageUrl;
 
       const response = await fetch(`${API_BASE_URL}/events/${id}`, {
         method: 'PUT',
@@ -230,6 +235,7 @@ export const eventsApi = {
         maxParticipants: item.max_participants ?? item.maxParticipants,
         currentParticipants: item.current_participants ?? item.currentParticipants,
         registrationDeadline: item.registration_deadline ? new Date(item.registration_deadline) : undefined,
+        imageUrl: item.image_url ?? item.imageUrl,
       };
     } catch (error) {
       console.error('Failed to update event via API:', error);
