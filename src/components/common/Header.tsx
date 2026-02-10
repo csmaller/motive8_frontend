@@ -66,7 +66,7 @@ const Header: React.FC = () => {
         // Use a safer scroll method that doesn't break on refresh
         try {
           window.scrollTo({ top: 0, behavior: 'auto' });
-        } catch (error) {
+        } catch {
           // Fallback for older browsers or edge cases
           window.scrollTo(0, 0);
         }
