@@ -435,7 +435,7 @@ export const newsApi = {
         slug: article.slug,
         excerpt: article.excerpt,
         content: article.content,
-        author: article.author,
+        author_id: article.author, // Expecting author to be author_id now
         status: article.status,
         category: article.category,
         featured_image: article.featuredImage,
@@ -508,7 +508,7 @@ export const newsApi = {
       if (article.slug !== undefined) apiData.slug = article.slug;
       if (article.excerpt !== undefined) apiData.excerpt = article.excerpt;
       if (article.content !== undefined) apiData.content = article.content;
-      if (article.author !== undefined) apiData.author = article.author;
+      if (article.author !== undefined) apiData.author_id = article.author; // Expecting author to be author_id now
       if (article.status !== undefined) apiData.status = article.status;
       if (article.category !== undefined) apiData.category = article.category;
       if (article.featuredImage !== undefined) apiData.featured_image = article.featuredImage;

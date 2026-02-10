@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { newsApi } from '../../services/adminApi';
+import { peopleApi } from '../../services/peopleApi';
 import type { NewsCategory, NewsStatus } from '../../types';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
@@ -16,7 +17,7 @@ interface NewsFormData {
   slug: string;
   excerpt: string;
   content: string;
-  author: string;
+  authorId: string;
   category: NewsCategory;
   status: NewsStatus;
   featured: boolean;
@@ -33,6 +34,7 @@ const AdminNewsEdit: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [authors, setAuthors] = useState<Array<{ value: string; label: string }>>([]);
 
   const {
     register,
@@ -47,7 +49,7 @@ const AdminNewsEdit: React.FC = () => {
       slug: '',
       excerpt: '',
       content: '',
-      author: '',
+      authorId: '',
       category: 'general',
       status: 'draft',
       featured: false,
@@ -57,6 +59,23 @@ const AdminNewsEdit: React.FC = () => {
   });
 
   const watchTitle = watch('title');
+
+  // Load all people for author dropdown
+  useEffect(() => {
+    const loadAuthors = async () => {
+      try {
+        const people = await peopleApi.getAll();
+        const authorOptions = people.map(person => ({
+          value: person.id.toString(),
+          label: `${person.person.firstName} ${person.person.lastName}`
+        }));
+        setAuthors(authorOptions);
+      } catch (error) {
+        console.error('Failed to load authors:', error);
+      }
+    };
+    loadAuthors();
+  }, []);
 
   const loadArticle = useCallback(async (articleId: string) => {
     try {
@@ -68,7 +87,7 @@ const AdminNewsEdit: React.FC = () => {
         slug: article.slug,
         excerpt: article.excerpt,
         content: article.content,
-        author: article.author,
+        authorId: article.author, // This will need to be author_id from backend
         category: article.category,
         status: article.status,
         featured: article.featured,
@@ -108,8 +127,17 @@ const AdminNewsEdit: React.FC = () => {
       setError('');
       setSuccess('');
       
+      // Create article data with author as the ID (will be transformed to author_id in API)
       const articleData = {
-        ...data,
+        title: data.title,
+        slug: data.slug,
+        excerpt: data.excerpt,
+        content: data.content,
+        author: data.authorId, // Store as author, API will transform to author_id
+        category: data.category,
+        status: data.status,
+        featured: data.featured,
+        readTime: data.readTime,
         tags: data.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0)
       };
 
@@ -213,11 +241,11 @@ const AdminNewsEdit: React.FC = () => {
                 helperText="URL-friendly version of the title"
               />
               
-              <Input
+              <Select
                 label="Author"
-                {...register('author', { required: 'Author is required' })}
-                error={errors.author?.message}
-                placeholder="Author name"
+                {...register('authorId', { required: 'Author is required' })}
+                error={errors.authorId?.message}
+                options={authors}
               />
               
               <Select
