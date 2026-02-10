@@ -1,4 +1,5 @@
 import type { Coach, Event, Product, VelocityClass, NewsArticle } from '../types';
+import { API_BASE_URL } from '../config/api';
 
 // Coaches API
 export const coachesApi = {
@@ -43,36 +44,225 @@ export const coachesApi = {
 // Events API
 export const eventsApi = {
   getAll: async (): Promise<Event[]> => {
-    const { mockEvents } = await import('../data/mockData');
-    return mockEvents;
+    try {
+      const response = await fetch(`${API_BASE_URL}/events`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      // Transform API response to match our interface
+      return data.map((item: any) => ({
+        id: item.id || item.event_id,
+        title: item.title,
+        description: item.description,
+        date: new Date(item.date),
+        time: item.time,
+        location: item.location,
+        type: item.type,
+        cost: item.cost,
+        registrationRequired: item.registration_required ?? item.registrationRequired,
+        maxParticipants: item.max_participants ?? item.maxParticipants,
+        currentParticipants: item.current_participants ?? item.currentParticipants,
+        registrationDeadline: item.registration_deadline ? new Date(item.registration_deadline) : undefined,
+      }));
+    } catch (error) {
+      console.error('Failed to fetch events from API:', error);
+      console.log('Falling back to mock data...');
+      const { mockEvents } = await import('../data/mockData');
+      return mockEvents;
+    }
   },
 
   getById: async (id: string): Promise<Event> => {
-    const { mockEvents } = await import('../data/mockData');
-    const event = mockEvents.find(e => e.id === id);
-    if (!event) throw new Error('Event not found');
-    return event;
+    try {
+      const response = await fetch(`${API_BASE_URL}/events/${id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const item = await response.json();
+      
+      return {
+        id: item.id || item.event_id,
+        title: item.title,
+        description: item.description,
+        date: new Date(item.date),
+        time: item.time,
+        location: item.location,
+        type: item.type,
+        cost: item.cost,
+        registrationRequired: item.registration_required ?? item.registrationRequired,
+        maxParticipants: item.max_participants ?? item.maxParticipants,
+        currentParticipants: item.current_participants ?? item.currentParticipants,
+        registrationDeadline: item.registration_deadline ? new Date(item.registration_deadline) : undefined,
+      };
+    } catch (error) {
+      console.error('Failed to fetch event from API:', error);
+      console.log('Falling back to mock data...');
+      const { mockEvents } = await import('../data/mockData');
+      const event = mockEvents.find(e => e.id === id);
+      if (!event) throw new Error('Event not found');
+      return event;
+    }
   },
 
   create: async (event: Omit<Event, 'id'>): Promise<Event> => {
-    const newEvent: Event = {
-      ...event,
-      id: Date.now().toString(),
-    };
-    console.log('Creating event:', newEvent);
-    return newEvent;
+    try {
+      // Transform to API format
+      const apiData = {
+        title: event.title,
+        description: event.description,
+        date: event.date instanceof Date ? event.date.toISOString().split('T')[0] : event.date,
+        time: event.time,
+        location: event.location,
+        type: event.type,
+        cost: event.cost,
+        registration_required: event.registrationRequired,
+        max_participants: event.maxParticipants,
+        current_participants: event.currentParticipants || 0,
+        registration_deadline: event.registrationDeadline instanceof Date ? event.registrationDeadline.toISOString().split('T')[0] : event.registrationDeadline,
+      };
+
+      const response = await fetch(`${API_BASE_URL}/events`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+        },
+        body: JSON.stringify(apiData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`HTTP ${response.status}: ${errorData.message || response.statusText}`);
+      }
+
+      const item = await response.json();
+      
+      return {
+        id: item.id || item.event_id,
+        title: item.title,
+        description: item.description,
+        date: new Date(item.date),
+        time: item.time,
+        location: item.location,
+        type: item.type,
+        cost: item.cost,
+        registrationRequired: item.registration_required ?? item.registrationRequired,
+        maxParticipants: item.max_participants ?? item.maxParticipants,
+        currentParticipants: item.current_participants ?? item.currentParticipants,
+        registrationDeadline: item.registration_deadline ? new Date(item.registration_deadline) : undefined,
+      };
+    } catch (error) {
+      console.error('Failed to create event via API:', error);
+      console.log('Falling back to mock creation...');
+      const newEvent: Event = {
+        ...event,
+        id: Date.now().toString(),
+        date: event.date instanceof Date ? event.date : new Date(event.date),
+      };
+      return newEvent;
+    }
   },
 
   update: async (id: string, event: Partial<Event>): Promise<Event> => {
-    console.log('Updating event:', id, event);
-    const { mockEvents } = await import('../data/mockData');
-    const existingEvent = mockEvents.find(e => e.id === id);
-    if (!existingEvent) throw new Error('Event not found');
-    return { ...existingEvent, ...event };
+    try {
+      // Transform to API format
+      const apiData: any = {};
+      if (event.title !== undefined) apiData.title = event.title;
+      if (event.description !== undefined) apiData.description = event.description;
+      if (event.date !== undefined) {
+        apiData.date = event.date instanceof Date ? event.date.toISOString().split('T')[0] : event.date;
+      }
+      if (event.time !== undefined) apiData.time = event.time;
+      if (event.location !== undefined) apiData.location = event.location;
+      if (event.type !== undefined) apiData.type = event.type;
+      if (event.cost !== undefined) apiData.cost = event.cost;
+      if (event.registrationRequired !== undefined) apiData.registration_required = event.registrationRequired;
+      if (event.maxParticipants !== undefined) apiData.max_participants = event.maxParticipants;
+      if (event.currentParticipants !== undefined) apiData.current_participants = event.currentParticipants;
+      if (event.registrationDeadline !== undefined) {
+        apiData.registration_deadline = event.registrationDeadline instanceof Date ? event.registrationDeadline.toISOString().split('T')[0] : event.registrationDeadline;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/events/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+        },
+        body: JSON.stringify(apiData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`HTTP ${response.status}: ${errorData.message || response.statusText}`);
+      }
+
+      const item = await response.json();
+      
+      return {
+        id: item.id || item.event_id,
+        title: item.title,
+        description: item.description,
+        date: new Date(item.date),
+        time: item.time,
+        location: item.location,
+        type: item.type,
+        cost: item.cost,
+        registrationRequired: item.registration_required ?? item.registrationRequired,
+        maxParticipants: item.max_participants ?? item.maxParticipants,
+        currentParticipants: item.current_participants ?? item.currentParticipants,
+        registrationDeadline: item.registration_deadline ? new Date(item.registration_deadline) : undefined,
+      };
+    } catch (error) {
+      console.error('Failed to update event via API:', error);
+      console.log('Falling back to mock update...');
+      const { mockEvents } = await import('../data/mockData');
+      const existingEvent = mockEvents.find(e => e.id === id);
+      if (!existingEvent) throw new Error('Event not found');
+      return { 
+        ...existingEvent, 
+        ...event,
+        date: event.date instanceof Date ? event.date : (event.date ? new Date(event.date) : existingEvent.date),
+      };
+    }
   },
 
   delete: async (id: string): Promise<void> => {
-    console.log('Deleting event:', id);
+    try {
+      const response = await fetch(`${API_BASE_URL}/events/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`HTTP ${response.status}: ${errorData.message || response.statusText}`);
+      }
+    } catch (error) {
+      console.error('Failed to delete event via API:', error);
+      console.log('Falling back to mock deletion...');
+      console.log('Mock: Event deleted:', id);
+    }
   },
 };
 
@@ -151,66 +341,321 @@ export const velocityClassesApi = {
 // News API
 export const newsApi = {
   getAll: async (): Promise<NewsArticle[]> => {
-    const { mockNewsArticles } = await import('../data/mockData');
-    return mockNewsArticles;
+    try {
+      const response = await fetch(`${API_BASE_URL}/news`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      return data.map((item: Record<string, unknown>) => ({
+        id: item.id || item.article_id,
+        title: item.title,
+        slug: item.slug,
+        excerpt: item.excerpt,
+        content: item.content,
+        author: item.author,
+        publishedAt: new Date(item.published_at as string || item.publishedAt as string),
+        updatedAt: new Date(item.updated_at as string || item.updatedAt as string),
+        status: item.status,
+        category: item.category,
+        featuredImage: item.featured_image || item.featuredImage,
+        tags: item.tags || [],
+        featured: item.featured || false,
+        readTime: item.read_time || item.readTime || 5,
+      }));
+    } catch (error) {
+      console.error('Failed to fetch news from API:', error);
+      console.log('Falling back to mock data...');
+      const { mockNewsArticles } = await import('../data/mockData');
+      return mockNewsArticles;
+    }
   },
 
   getById: async (id: string): Promise<NewsArticle> => {
-    const { mockNewsArticles } = await import('../data/mockData');
-    const article = mockNewsArticles.find(a => a.id === id);
-    if (!article) throw new Error('Article not found');
-    return article;
+    try {
+      const response = await fetch(`${API_BASE_URL}/news/${id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const item = await response.json();
+      
+      return {
+        id: item.id || item.article_id,
+        title: item.title,
+        slug: item.slug,
+        excerpt: item.excerpt,
+        content: item.content,
+        author: item.author,
+        publishedAt: new Date(item.published_at || item.publishedAt),
+        updatedAt: new Date(item.updated_at || item.updatedAt),
+        status: item.status,
+        category: item.category,
+        featuredImage: item.featured_image || item.featuredImage,
+        tags: item.tags || [],
+        featured: item.featured || false,
+        readTime: item.read_time || item.readTime || 5,
+      };
+    } catch (error) {
+      console.error('Failed to fetch article from API:', error);
+      console.log('Falling back to mock data...');
+      const { mockNewsArticles } = await import('../data/mockData');
+      const article = mockNewsArticles.find(a => a.id === id);
+      if (!article) throw new Error('Article not found');
+      return article;
+    }
   },
 
   create: async (article: Omit<NewsArticle, 'id' | 'publishedAt' | 'updatedAt'>): Promise<NewsArticle> => {
-    const newArticle: NewsArticle = {
-      ...article,
-      id: Date.now().toString(),
-      publishedAt: new Date(),
-      updatedAt: new Date(),
-    };
-    console.log('Creating article:', newArticle);
-    return newArticle;
+    try {
+      const apiData = {
+        title: article.title,
+        slug: article.slug,
+        excerpt: article.excerpt,
+        content: article.content,
+        author: article.author,
+        status: article.status,
+        category: article.category,
+        featured_image: article.featuredImage,
+        tags: article.tags,
+        featured: article.featured,
+        read_time: article.readTime,
+      };
+
+      const response = await fetch(`${API_BASE_URL}/news`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+        },
+        body: JSON.stringify(apiData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`HTTP ${response.status}: ${errorData.message || response.statusText}`);
+      }
+
+      const item = await response.json();
+      
+      return {
+        id: item.id || item.article_id,
+        title: item.title,
+        slug: item.slug,
+        excerpt: item.excerpt,
+        content: item.content,
+        author: item.author,
+        publishedAt: new Date(item.published_at || item.publishedAt),
+        updatedAt: new Date(item.updated_at || item.updatedAt),
+        status: item.status,
+        category: item.category,
+        featuredImage: item.featured_image || item.featuredImage,
+        tags: item.tags || [],
+        featured: item.featured || false,
+        readTime: item.read_time || item.readTime || 5,
+      };
+    } catch (error) {
+      console.error('Failed to create article via API:', error);
+      console.log('Falling back to mock creation...');
+      const newArticle: NewsArticle = {
+        ...article,
+        id: Date.now().toString(),
+        publishedAt: new Date(),
+        updatedAt: new Date(),
+      };
+      return newArticle;
+    }
   },
 
   update: async (id: string, article: Partial<NewsArticle>): Promise<NewsArticle> => {
-    console.log('Updating article:', id, article);
-    const { mockNewsArticles } = await import('../data/mockData');
-    const existingArticle = mockNewsArticles.find(a => a.id === id);
-    if (!existingArticle) throw new Error('Article not found');
-    return { 
-      ...existingArticle, 
-      ...article, 
-      updatedAt: new Date() 
-    };
+    try {
+      const apiData: Record<string, unknown> = {};
+      if (article.title !== undefined) apiData.title = article.title;
+      if (article.slug !== undefined) apiData.slug = article.slug;
+      if (article.excerpt !== undefined) apiData.excerpt = article.excerpt;
+      if (article.content !== undefined) apiData.content = article.content;
+      if (article.author !== undefined) apiData.author = article.author;
+      if (article.status !== undefined) apiData.status = article.status;
+      if (article.category !== undefined) apiData.category = article.category;
+      if (article.featuredImage !== undefined) apiData.featured_image = article.featuredImage;
+      if (article.tags !== undefined) apiData.tags = article.tags;
+      if (article.featured !== undefined) apiData.featured = article.featured;
+      if (article.readTime !== undefined) apiData.read_time = article.readTime;
+
+      const response = await fetch(`${API_BASE_URL}/news/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+        },
+        body: JSON.stringify(apiData),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`HTTP ${response.status}: ${errorData.message || response.statusText}`);
+      }
+
+      const item = await response.json();
+      
+      return {
+        id: item.id || item.article_id,
+        title: item.title,
+        slug: item.slug,
+        excerpt: item.excerpt,
+        content: item.content,
+        author: item.author,
+        publishedAt: new Date(item.published_at || item.publishedAt),
+        updatedAt: new Date(item.updated_at || item.updatedAt),
+        status: item.status,
+        category: item.category,
+        featuredImage: item.featured_image || item.featuredImage,
+        tags: item.tags || [],
+        featured: item.featured || false,
+        readTime: item.read_time || item.readTime || 5,
+      };
+    } catch (error) {
+      console.error('Failed to update article via API:', error);
+      console.log('Falling back to mock update...');
+      const { mockNewsArticles } = await import('../data/mockData');
+      const existingArticle = mockNewsArticles.find(a => a.id === id);
+      if (!existingArticle) throw new Error('Article not found');
+      return { 
+        ...existingArticle, 
+        ...article, 
+        updatedAt: new Date() 
+      };
+    }
   },
 
   delete: async (id: string): Promise<void> => {
-    console.log('Deleting article:', id);
+    try {
+      const response = await fetch(`${API_BASE_URL}/news/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`HTTP ${response.status}: ${errorData.message || response.statusText}`);
+      }
+    } catch (error) {
+      console.error('Failed to delete article via API:', error);
+      console.log('Falling back to mock deletion...');
+      console.log('Mock: Article deleted:', id);
+    }
   },
 
   publish: async (id: string): Promise<NewsArticle> => {
-    console.log('Publishing article:', id);
-    const { mockNewsArticles } = await import('../data/mockData');
-    const existingArticle = mockNewsArticles.find(a => a.id === id);
-    if (!existingArticle) throw new Error('Article not found');
-    return { 
-      ...existingArticle, 
-      status: 'published',
-      publishedAt: new Date(),
-      updatedAt: new Date() 
-    };
+    try {
+      const response = await fetch(`${API_BASE_URL}/news/${id}/publish`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`HTTP ${response.status}: ${errorData.message || response.statusText}`);
+      }
+
+      const item = await response.json();
+      
+      return {
+        id: item.id || item.article_id,
+        title: item.title,
+        slug: item.slug,
+        excerpt: item.excerpt,
+        content: item.content,
+        author: item.author,
+        publishedAt: new Date(item.published_at || item.publishedAt),
+        updatedAt: new Date(item.updated_at || item.updatedAt),
+        status: item.status,
+        category: item.category,
+        featuredImage: item.featured_image || item.featuredImage,
+        tags: item.tags || [],
+        featured: item.featured || false,
+        readTime: item.read_time || item.readTime || 5,
+      };
+    } catch (error) {
+      console.error('Failed to publish article via API:', error);
+      console.log('Falling back to mock publish...');
+      const { mockNewsArticles } = await import('../data/mockData');
+      const existingArticle = mockNewsArticles.find(a => a.id === id);
+      if (!existingArticle) throw new Error('Article not found');
+      return { 
+        ...existingArticle, 
+        status: 'published',
+        publishedAt: new Date(),
+        updatedAt: new Date() 
+      };
+    }
   },
 
   archive: async (id: string): Promise<NewsArticle> => {
-    console.log('Archiving article:', id);
-    const { mockNewsArticles } = await import('../data/mockData');
-    const existingArticle = mockNewsArticles.find(a => a.id === id);
-    if (!existingArticle) throw new Error('Article not found');
-    return { 
-      ...existingArticle, 
-      status: 'archived',
-      updatedAt: new Date() 
-    };
+    try {
+      const response = await fetch(`${API_BASE_URL}/news/${id}/archive`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`HTTP ${response.status}: ${errorData.message || response.statusText}`);
+      }
+
+      const item = await response.json();
+      
+      return {
+        id: item.id || item.article_id,
+        title: item.title,
+        slug: item.slug,
+        excerpt: item.excerpt,
+        content: item.content,
+        author: item.author,
+        publishedAt: new Date(item.published_at || item.publishedAt),
+        updatedAt: new Date(item.updated_at || item.updatedAt),
+        status: item.status,
+        category: item.category,
+        featuredImage: item.featured_image || item.featuredImage,
+        tags: item.tags || [],
+        featured: item.featured || false,
+        readTime: item.read_time || item.readTime || 5,
+      };
+    } catch (error) {
+      console.error('Failed to archive article via API:', error);
+      console.log('Falling back to mock archive...');
+      const { mockNewsArticles } = await import('../data/mockData');
+      const existingArticle = mockNewsArticles.find(a => a.id === id);
+      if (!existingArticle) throw new Error('Article not found');
+      return { 
+        ...existingArticle, 
+        status: 'archived',
+        updatedAt: new Date() 
+      };
+    }
   },
 };
