@@ -106,6 +106,7 @@ const AdminNewsEdit: React.FC = () => {
     try {
       setIsSaving(true);
       setError('');
+      setSuccess('');
       
       const articleData = {
         ...data,
@@ -115,14 +116,15 @@ const AdminNewsEdit: React.FC = () => {
       if (isEditing && id) {
         await newsApi.update(id, articleData);
         setSuccess('Article updated successfully!');
+        setTimeout(() => navigate('/admin/news'), 1500);
       } else {
         await newsApi.create(articleData);
         setSuccess('Article created successfully!');
-        setTimeout(() => navigate('/admin/news'), 2000);
+        setTimeout(() => navigate('/admin/news'), 1500);
       }
     } catch (error) {
       console.error('Failed to save article:', error);
-      setError('Failed to save article');
+      setError(error instanceof Error ? error.message : 'Failed to save article. Please try again.');
     } finally {
       setIsSaving(false);
     }

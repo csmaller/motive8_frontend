@@ -99,6 +99,7 @@ const AdminEventsEdit: React.FC = () => {
     try {
       setIsSaving(true);
       setError('');
+      setSuccess('');
       
       const eventData = {
         ...data,
@@ -110,14 +111,15 @@ const AdminEventsEdit: React.FC = () => {
       if (isEditing && id) {
         await eventsApi.update(id, eventData);
         setSuccess('Event updated successfully!');
+        setTimeout(() => navigate('/admin/events'), 1500);
       } else {
         await eventsApi.create(eventData);
         setSuccess('Event created successfully!');
-        setTimeout(() => navigate('/admin/events'), 2000);
+        setTimeout(() => navigate('/admin/events'), 1500);
       }
     } catch (error) {
       console.error('Failed to save event:', error);
-      setError('Failed to save event');
+      setError(error instanceof Error ? error.message : 'Failed to save event. Please try again.');
     } finally {
       setIsSaving(false);
     }

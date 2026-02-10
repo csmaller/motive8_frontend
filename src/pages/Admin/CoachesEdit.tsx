@@ -98,6 +98,7 @@ const AdminCoachesEdit: React.FC = () => {
     try {
       setIsSaving(true);
       setError('');
+      setSuccess('');
       
       // Parse specializations from comma-separated string
       const specializationsArray = data.specializations
@@ -118,6 +119,7 @@ const AdminCoachesEdit: React.FC = () => {
       if (isEditing && id) {
         await peopleApi.update(id, userData as UpdateUserData);
         setSuccess('Coach updated successfully!');
+        setTimeout(() => navigate('/admin/coaches'), 1500);
       } else {
         // For new coaches, we need to provide default values for required fields
         const createData = {
@@ -126,11 +128,11 @@ const AdminCoachesEdit: React.FC = () => {
         };
         await peopleApi.create(createData as CreateUserData);
         setSuccess('Coach created successfully!');
-        setTimeout(() => navigate('/admin/coaches'), 2000);
+        setTimeout(() => navigate('/admin/coaches'), 1500);
       }
     } catch (error) {
       console.error('Failed to save coach:', error);
-      setError('Failed to save coach');
+      setError(error instanceof Error ? error.message : 'Failed to save coach. Please try again.');
     } finally {
       setIsSaving(false);
     }
