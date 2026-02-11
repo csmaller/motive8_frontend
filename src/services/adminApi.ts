@@ -500,36 +500,198 @@ export const productsApi = {
 // Velocity Classes API
 export const velocityClassesApi = {
   getAll: async (): Promise<VelocityClass[]> => {
-    const { mockVelocityClasses } = await import('../data/mockData');
-    return mockVelocityClasses;
+    try {
+      const response = await fetch(`${API_BASE_URL}/velocity-classes`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      return data.map((item: Record<string, unknown>) => ({
+        id: String(item.id),
+        name: String(item.name || ''),
+        description: String(item.description || ''),
+        schedule: String(item.schedule || ''),
+        duration: String(item.duration || ''),
+        maxParticipants: Number(item.max_participants || 0),
+        currentEnrollment: Number(item.current_enrollment || 0),
+        instructor: String(item.instructor || ''),
+        level: String(item.level || 'beginner') as 'beginner' | 'intermediate' | 'advanced',
+        cost: Number(item.cost || 0),
+        location: String(item.location || ''),
+        equipment: Array.isArray(item.equipment) ? item.equipment : undefined,
+        prerequisites: Array.isArray(item.prerequisites) ? item.prerequisites : undefined,
+      }));
+    } catch (error) {
+      console.error('Failed to fetch velocity classes from API:', error);
+      return [];
+    }
   },
 
   getById: async (id: string): Promise<VelocityClass> => {
-    const { mockVelocityClasses } = await import('../data/mockData');
-    const velocityClass = mockVelocityClasses.find(v => v.id === id);
-    if (!velocityClass) throw new Error('Velocity class not found');
-    return velocityClass;
+    try {
+      const response = await fetch(`${API_BASE_URL}/velocity-classes/${id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const item: Record<string, unknown> = await response.json();
+      
+      return {
+        id: String(item.id),
+        name: String(item.name || ''),
+        description: String(item.description || ''),
+        schedule: String(item.schedule || ''),
+        duration: String(item.duration || ''),
+        maxParticipants: Number(item.max_participants || 0),
+        currentEnrollment: Number(item.current_enrollment || 0),
+        instructor: String(item.instructor || ''),
+        level: String(item.level || 'beginner') as 'beginner' | 'intermediate' | 'advanced',
+        cost: Number(item.cost || 0),
+        location: String(item.location || ''),
+        equipment: Array.isArray(item.equipment) ? item.equipment : undefined,
+        prerequisites: Array.isArray(item.prerequisites) ? item.prerequisites : undefined,
+      };
+    } catch (error) {
+      console.error('Failed to fetch velocity class from API:', error);
+      throw new Error('Velocity class not found');
+    }
   },
 
   create: async (velocityClass: Omit<VelocityClass, 'id'>): Promise<VelocityClass> => {
-    const newVelocityClass: VelocityClass = {
-      ...velocityClass,
-      id: Date.now().toString(),
-    };
-    console.log('Creating velocity class:', newVelocityClass);
-    return newVelocityClass;
+    try {
+      const response = await fetch(`${API_BASE_URL}/velocity-classes`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+        },
+        body: JSON.stringify({
+          name: velocityClass.name,
+          description: velocityClass.description,
+          schedule: velocityClass.schedule,
+          duration: velocityClass.duration,
+          max_participants: velocityClass.maxParticipants,
+          current_enrollment: velocityClass.currentEnrollment,
+          instructor: velocityClass.instructor,
+          level: velocityClass.level,
+          cost: velocityClass.cost,
+          location: velocityClass.location,
+          equipment: velocityClass.equipment,
+          prerequisites: velocityClass.prerequisites,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`HTTP ${response.status}: ${errorData.message || response.statusText}`);
+      }
+
+      const item: Record<string, unknown> = await response.json();
+      
+      return {
+        id: String(item.id),
+        name: String(item.name || ''),
+        description: String(item.description || ''),
+        schedule: String(item.schedule || ''),
+        duration: String(item.duration || ''),
+        maxParticipants: Number(item.max_participants || 0),
+        currentEnrollment: Number(item.current_enrollment || 0),
+        instructor: String(item.instructor || ''),
+        level: String(item.level || 'beginner') as 'beginner' | 'intermediate' | 'advanced',
+        cost: Number(item.cost || 0),
+        location: String(item.location || ''),
+        equipment: Array.isArray(item.equipment) ? item.equipment : undefined,
+        prerequisites: Array.isArray(item.prerequisites) ? item.prerequisites : undefined,
+      };
+    } catch (error) {
+      console.error('Failed to create velocity class via API:', error);
+      throw error;
+    }
   },
 
   update: async (id: string, velocityClass: Partial<VelocityClass>): Promise<VelocityClass> => {
-    console.log('Updating velocity class:', id, velocityClass);
-    const { mockVelocityClasses } = await import('../data/mockData');
-    const existingClass = mockVelocityClasses.find(v => v.id === id);
-    if (!existingClass) throw new Error('Velocity class not found');
-    return { ...existingClass, ...velocityClass };
+    try {
+      const response = await fetch(`${API_BASE_URL}/velocity-classes/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+        },
+        body: JSON.stringify({
+          name: velocityClass.name,
+          description: velocityClass.description,
+          schedule: velocityClass.schedule,
+          duration: velocityClass.duration,
+          max_participants: velocityClass.maxParticipants,
+          current_enrollment: velocityClass.currentEnrollment,
+          instructor: velocityClass.instructor,
+          level: velocityClass.level,
+          cost: velocityClass.cost,
+          location: velocityClass.location,
+          equipment: velocityClass.equipment,
+          prerequisites: velocityClass.prerequisites,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`HTTP ${response.status}: ${errorData.message || response.statusText}`);
+      }
+
+      const item: Record<string, unknown> = await response.json();
+      
+      return {
+        id: String(item.id),
+        name: String(item.name || ''),
+        description: String(item.description || ''),
+        schedule: String(item.schedule || ''),
+        duration: String(item.duration || ''),
+        maxParticipants: Number(item.max_participants || 0),
+        currentEnrollment: Number(item.current_enrollment || 0),
+        instructor: String(item.instructor || ''),
+        level: String(item.level || 'beginner') as 'beginner' | 'intermediate' | 'advanced',
+        cost: Number(item.cost || 0),
+        location: String(item.location || ''),
+        equipment: Array.isArray(item.equipment) ? item.equipment : undefined,
+        prerequisites: Array.isArray(item.prerequisites) ? item.prerequisites : undefined,
+      };
+    } catch (error) {
+      console.error('Failed to update velocity class via API:', error);
+      throw error;
+    }
   },
 
   delete: async (id: string): Promise<void> => {
-    console.log('Deleting velocity class:', id);
+    try {
+      const response = await fetch(`${API_BASE_URL}/velocity-classes/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`HTTP ${response.status}: ${errorData.message || response.statusText}`);
+      }
+    } catch (error) {
+      console.error('Failed to delete velocity class via API:', error);
+      throw error;
+    }
   },
 };
 

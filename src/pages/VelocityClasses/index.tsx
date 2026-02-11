@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Image from '../../components/ui/Image';
+import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import RegistrationForm from '../../components/forms/RegistrationForm';
-import { mockVelocityClasses } from '../../data/mockData';
+import { velocityClassesApi } from '../../services/adminApi';
 import type { VelocityClass, ExperienceLevel, RegistrationFormData } from '../../types';
 import velocityImage from '../../assets/img/layout/velocity.png';
 
@@ -12,8 +13,24 @@ const VelocityClasses: React.FC = () => {
   const [showRegistrationForm, setShowRegistrationForm] = useState(false);
   const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
   const [isFormLoading, setIsFormLoading] = useState(false);
-  
-  const classes = mockVelocityClasses;
+  const [classes, setClasses] = useState<VelocityClass[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadClasses = async () => {
+      try {
+        setIsLoading(true);
+        const data = await velocityClassesApi.getAll();
+        setClasses(data);
+      } catch (error) {
+        console.error('Failed to load velocity classes:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadClasses();
+  }, []);
   
   const filteredClasses = selectedLevel === 'all' 
     ? classes 
@@ -233,6 +250,16 @@ const VelocityClasses: React.FC = () => {
       </Card>
     );
   };
+
+  if (isLoading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex justify-center">
+          <LoadingSpinner size="lg" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">

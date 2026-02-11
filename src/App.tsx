@@ -24,6 +24,8 @@ import AdminUsers from './pages/Admin/Users';
 import AdminUsersEdit from './pages/Admin/UsersEdit';
 import AdminProducts from './pages/Admin/Products';
 import AdminProductsEdit from './pages/Admin/ProductsEdit';
+import AdminVelocityClasses from './pages/Admin/VelocityClasses';
+import AdminVelocityClassesEdit from './pages/Admin/VelocityClassesEdit';
 
 function App() {
   return (
@@ -185,12 +187,21 @@ function App() {
             <Route path="/admin/velocity-classes" element={
               <ProtectedRoute requireSuperAdmin={true}>
                 <AdminLayout>
-                  <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                    <div className="text-center">
-                      <h1 className="text-2xl font-bold text-gray-900 mb-4">Velocity Classes Management</h1>
-                      <p className="text-gray-600">Coming soon...</p>
-                    </div>
-                  </div>
+                  <AdminVelocityClasses />
+                </AdminLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/velocity-classes/new" element={
+              <ProtectedRoute requireSuperAdmin={true}>
+                <AdminLayout>
+                  <AdminVelocityClassesEdit />
+                </AdminLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/admin/velocity-classes/:id" element={
+              <ProtectedRoute requireSuperAdmin={true}>
+                <AdminLayout>
+                  <AdminVelocityClassesEdit />
                 </AdminLayout>
               </ProtectedRoute>
             } />
