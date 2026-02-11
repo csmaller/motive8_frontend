@@ -1,15 +1,34 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
-import { mockEvents } from '../../data/mockData';
+import LoadingSpinner from '../../components/ui/LoadingSpinner';
+import { eventsApi } from '../../services/adminApi';
 import type { Event, EventType } from '../../types';
 
 const Events: React.FC = () => {
   const [selectedType, setSelectedType] = useState<EventType | 'all'>('all');
   const [sortBy, setSortBy] = useState<'date' | 'type'>('date');
+  const [events, setEvents] = useState<Event[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadEvents = async () => {
+      try {
+        setIsLoading(true);
+        const data = await eventsApi.getAll();
+        setEvents(data);
+      } catch (error) {
+        console.error('Failed to load events:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadEvents();
+  }, []);
   
   // Sort events chronologically by date (earliest first)
-  const sortedEvents = [...mockEvents].sort((a, b) => a.date.getTime() - b.date.getTime());
+  const sortedEvents = [...events].sort((a, b) => a.date.getTime() - b.date.getTime());
   
   const filteredEvents = selectedType === 'all' 
     ? sortedEvents 
@@ -244,6 +263,16 @@ const Events: React.FC = () => {
       );
     });
   };
+
+  if (isLoading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="flex justify-center">
+          <LoadingSpinner size="lg" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
