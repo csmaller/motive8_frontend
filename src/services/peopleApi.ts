@@ -31,6 +31,37 @@ interface ApiPersonResponse {
     updated_at?: string;
     deleted_at?: string | null;
   };
+  person?: {
+    id?: number | string;
+    user_id?: number | string;
+    first_name?: string;
+    firstName?: string;
+    last_name?: string;
+    lastName?: string;
+    phone?: string;
+    image?: string;
+    image_url?: string;
+    specialization?: string;
+    specializations?: string[];
+    created_at?: string;
+    createdAt?: string;
+    updated_at?: string;
+    updatedAt?: string;
+    person_id?: string;
+    username?: string;
+    user_type?: string;
+    email?: string;
+    last_login?: string;
+    user?: {
+      id?: number;
+      email?: string;
+      user_type_id?: number;
+      created_at?: string;
+      updated_at?: string;
+      deleted_at?: string | null;
+    };
+  };
+  message?: string; // For responses with message wrapper
 }
 
 // Export types for use in other files
@@ -357,6 +388,10 @@ export const peopleApi = {
     try {
       // Use FormData to send file upload
       const formData = new FormData();
+      
+      // Laravel requires _method field for PUT with FormData
+      formData.append('_method', 'PUT');
+      
       if (userData.firstName) formData.append('first_name', userData.firstName);
       if (userData.lastName) formData.append('last_name', userData.lastName);
       if (userData.phone) formData.append('phone', userData.phone);
@@ -371,11 +406,11 @@ export const peopleApi = {
         console.log('Adding image file to form data:', userData.imageFile.name);
       }
 
-      console.log('Updating person with FormData');
+      console.log('Updating person with FormData (using POST with _method=PUT)');
       console.log('API URL:', `${API_BASE_URL}/people/${id}`);
 
       const response = await fetch(`${API_BASE_URL}/people/${id}`, {
-        method: 'PUT',
+        method: 'POST', // Use POST instead of PUT for FormData
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
           // Don't set Content-Type - let browser set it with boundary for multipart/form-data
@@ -401,9 +436,14 @@ export const peopleApi = {
         throw new Error(errorMessage);
       }
 
-      const item: ApiPersonResponse = await response.json();
+      const responseData: ApiPersonResponse = await response.json();
       
-      console.log('Update response:', item);
+      console.log('Update response:', responseData);
+      
+      // Check if response has nested person object (Laravel format: {message: "...", person: {...}})
+      const item = responseData.person || responseData;
+      
+      console.log('Extracted person data:', item);
       
       // Extract email from nested user object if present
       const email = item.user?.email || item.email || '';
@@ -412,7 +452,7 @@ export const peopleApi = {
       // Transform the API response back to our interface
       return {
         id: String(userId),
-        personId: item.person_id || item.id || '',
+        personId: String(item.person_id || item.id || ''),
         username: item.username || email.split('@')[0] || '',
         user_type: item.user_type ||"",
         email: email,
@@ -420,12 +460,12 @@ export const peopleApi = {
         updatedAt: new Date(item.updated_at || item.updatedAt || Date.now()),
         lastLogin: item.last_login ? new Date(item.last_login) : undefined,
         person: {
-          id: item.person_id || item.id || '',
+          id: String(item.person_id || item.id || ''),
           firstName: item.first_name || item.firstName || '',
           lastName: item.last_name || item.lastName || '',
           phone: item.phone || undefined,
           image: item.image_url || item.image,
-          specializations: parseSpecializations(item),
+          specializations: parseSpecializations(item as ApiPersonResponse),
           createdAt: new Date(item.created_at || item.createdAt || Date.now()),
           updatedAt: new Date(item.updated_at || item.updatedAt || Date.now()),
         }
