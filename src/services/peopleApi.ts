@@ -177,7 +177,7 @@ export const peopleApi = {
         first_name: userData.firstName,
         last_name: userData.lastName,
         phone: userData.phone,
-        image: userData.image,
+        image_url: userData.image, // Backend uses image_url
         specializations: userData.specializations || [],
         username: userData.username,
         email: userData.email,
@@ -257,7 +257,7 @@ export const peopleApi = {
         first_name: userData.firstName,
         last_name: userData.lastName,
         phone: userData.phone,
-        image: userData.image,
+        image_url: userData.image, // Backend uses image_url
         specializations: userData.specializations,
         email: userData.email,
         ...(userData.password && { password: userData.password }),
