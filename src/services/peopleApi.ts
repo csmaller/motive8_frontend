@@ -254,11 +254,20 @@ export const peopleApi = {
           'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
         },
         body: JSON.stringify(personPayload),
+        redirect: 'manual', // Don't follow redirects automatically
       });
 
       console.log('Person creation response status:', response.status);
       console.log('Response URL:', response.url);
       console.log('Response redirected:', response.redirected);
+      console.log('Response type:', response.type);
+
+      // Check if we got redirected (status 301, 302, 303, 307, 308)
+      if (response.type === 'opaqueredirect' || response.status >= 300 && response.status < 400) {
+        const location = response.headers.get('Location');
+        console.error('Person creation was redirected to:', location);
+        throw new Error('Person creation failed: API redirected (likely authentication issue)');
+      }
 
       if (!response.ok) {
         const contentType = response.headers.get('content-type');
