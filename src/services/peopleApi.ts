@@ -208,9 +208,16 @@ export const peopleApi = {
 
       const item: ApiPersonResponse = await response.json();
       
+      console.log('getById raw API response:', item);
+      console.log('Specializations from API:', item.specializations);
+      console.log('Specialization (singular) from API:', item.specialization);
+      
       // Extract email from nested user object if present
       const email = item.user?.email || item.email || '';
       const userId = item.user?.id || item.user_id || item.id || '';
+      
+      const parsedSpecializations = parseSpecializations(item);
+      console.log('Parsed specializations:', parsedSpecializations);
       
       // Transform the API response to match our interface
       return {
@@ -228,7 +235,7 @@ export const peopleApi = {
           lastName: item.last_name || item.lastName || '',
           phone: formatPhoneNumber(item.phone),
           image: item.image_url || item.image,
-          specializations: parseSpecializations(item),
+          specializations: parsedSpecializations,
           createdAt: new Date(item.created_at || item.createdAt || Date.now()),
           updatedAt: new Date(item.updated_at || item.updatedAt || Date.now()),
         }

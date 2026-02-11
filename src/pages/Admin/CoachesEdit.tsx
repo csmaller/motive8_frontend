@@ -59,22 +59,14 @@ const AdminCoachesEdit: React.FC = () => {
       const coach = await peopleApi.getById(coachId);
       
       console.log('Loaded coach data:', coach);
-      
-      // Format phone number for display
-      const formatPhoneForDisplay = (phone: string | undefined): string => {
-        if (!phone) return '';
-        const numbers = phone.replace(/\D/g, '');
-        if (numbers.length === 10) {
-          return `${numbers.slice(0, 3)}-${numbers.slice(3, 6)}-${numbers.slice(6)}`;
-        }
-        return phone;
-      };
+      console.log('Coach phone:', coach.person.phone);
+      console.log('Coach specializations:', coach.person.specializations);
       
       reset({
         firstName: coach.person.firstName,
         lastName: coach.person.lastName,
         email: coach.email,
-        phone: formatPhoneForDisplay(coach.person.phone),
+        phone: coach.person.phone || '',
         specializations: coach.person.specializations?.join(', ') || '',
         password: '',
         confirmPassword: ''
