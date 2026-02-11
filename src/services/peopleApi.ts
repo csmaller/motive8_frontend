@@ -85,14 +85,25 @@ const formatPhoneNumber = (phone: string | undefined): string | undefined => {
 
 // Helper function to parse specializations from API response
 const parseSpecializations = (item: ApiPersonResponse): string[] => {
-  // If specializations array exists, use it
-  if (item.specializations && Array.isArray(item.specializations)) {
+  console.log('parseSpecializations input:', {
+    specializations: item.specializations,
+    specialization: item.specialization
+  });
+  
+  // If specializations array exists and has items, use it
+  if (item.specializations && Array.isArray(item.specializations) && item.specializations.length > 0) {
+    console.log('Using specializations array:', item.specializations);
     return item.specializations;
   }
+  
   // If specialization string exists, split by comma
-  if (item.specialization && typeof item.specialization === 'string') {
-    return item.specialization.split(',').map(s => s.trim()).filter(s => s.length > 0);
+  if (item.specialization && typeof item.specialization === 'string' && item.specialization.trim().length > 0) {
+    const parsed = item.specialization.split(',').map(s => s.trim()).filter(s => s.length > 0);
+    console.log('Parsed from specialization string:', parsed);
+    return parsed;
   }
+  
+  console.log('No specializations found, returning empty array');
   return [];
 };
 
