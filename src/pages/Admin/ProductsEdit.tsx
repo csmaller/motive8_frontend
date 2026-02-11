@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { productsApi } from '../../services/adminApi';
+import { API_BASE_URL } from '../../config/api';
 import type { ProductCategory } from '../../types';
 import { PRODUCT_CATEGORIES } from '../../types';
 import Card from '../../components/ui/Card';
@@ -27,7 +28,7 @@ interface ProductFormData {
   brand?: string;
   rating: number;
   reviewCount: number;
-  paymentUrl?: string;
+  paymentLink?: string;
 }
 
 const AdminProductsEdit: React.FC = () => {
@@ -62,7 +63,7 @@ const AdminProductsEdit: React.FC = () => {
       brand: '',
       rating: 0,
       reviewCount: 0,
-      paymentUrl: '',
+      paymentLink: '',
     }
   });
 
@@ -85,7 +86,7 @@ const AdminProductsEdit: React.FC = () => {
         brand: product.brand || '',
         rating: product.rating,
         reviewCount: product.reviewCount,
-        paymentUrl: product.paymentUrl || '',
+        paymentLink: product.paymentLink || '',
       });
       
       // Set current image (use first image if available)
@@ -110,40 +111,86 @@ const AdminProductsEdit: React.FC = () => {
       setError('');
       setSuccess('');
 
-      const productData = {
-        name: data.name,
-        description: data.description,
-        price: Number(data.price),
-        originalPrice: data.originalPrice ? Number(data.originalPrice) : undefined,
-        category: data.category,
-        images: currentImage ? [currentImage] : [],
-        imageFile: imageFile || undefined,
-        inStock: data.inStock,
-        stockQuantity: Number(data.stockQuantity),
-        sizes: data.sizes ? data.sizes.split(',').map(s => s.trim()).filter(s => s) : undefined,
-        colors: data.colors ? data.colors.split(',').map(c => c.trim()).filter(c => c) : undefined,
-        rating: Number(data.rating),
-        reviewCount: Number(data.reviewCount),
-        features: data.features ? data.features.split(',').map(f => f.trim()).filter(f => f) : undefined,
-        brand: data.brand || undefined,
-        paymentUrl: data.paymentUrl || undefined,
-      };
+      // Use FormData if there's an image file to upload
+      if (imageFile) {
+        const formData = new FormData();
+        formData.append('name', data.name);
+        formData.append('description', data.description);
+        formData.append('price', String(data.price));
+        if (data.originalPrice) formData.append('original_price', String(data.originalPrice));
+        formData.append('category', data.category);
+        formData.append('in_stock', String(data.inStock));
+        formData.append('stock_quantity', String(data.stockQuantity));
+        if (data.sizes) formData.append('sizes', JSON.stringify(data.sizes.split(',').map(s => s.trim()).filter(s => s)));
+        if (data.colors) formData.append('colors', JSON.stringify(data.colors.split(',').map(c => c.trim()).filter(c => c)));
+        formData.append('rating', String(data.rating));
+        formData.append('review_count', String(data.reviewCount));
+        if (data.features) formData.append('features', JSON.stringify(data.features.split(',').map(f => f.trim()).filter(f => f)));
+        if (data.brand) formData.append('brand', data.brand);
+        if (data.paymentLink) formData.append('payment_link', data.paymentLink);
+        formData.append('image', imageFile);
+        
+        if (isEditing) {
+          formData.append('_method', 'PUT');
+        }
 
-      if (isEditing && id) {
-        const updatedProduct = await productsApi.update(id, productData);
+        const response = await fetch(`${isEditing ? `${API_BASE_URL}/products/${id}` : `${API_BASE_URL}/products`}`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+          },
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(`HTTP ${response.status}: ${errorData.message || response.statusText}`);
+        }
+
+        const result = await response.json();
         
         // Update the current image with the new image from the response
-        if (updatedProduct.images && updatedProduct.images.length > 0) {
-          setCurrentImage(updatedProduct.images[0]);
+        if (result.images && result.images.length > 0) {
+          setCurrentImage(result.images[0]);
         }
         
         // Clear the file object since it's been uploaded
         setImageFile(null);
         
-        setSuccess('Product updated successfully!');
+        setSuccess(isEditing ? 'Product updated successfully!' : 'Product created successfully!');
       } else {
-        await productsApi.create(productData);
-        setSuccess('Product created successfully!');
+        // No image file, use JSON
+        const productData = {
+          name: data.name,
+          description: data.description,
+          price: Number(data.price),
+          originalPrice: data.originalPrice ? Number(data.originalPrice) : undefined,
+          category: data.category,
+          images: currentImage ? [currentImage] : [],
+          inStock: data.inStock,
+          stockQuantity: Number(data.stockQuantity),
+          sizes: data.sizes ? data.sizes.split(',').map(s => s.trim()).filter(s => s) : undefined,
+          colors: data.colors ? data.colors.split(',').map(c => c.trim()).filter(c => c) : undefined,
+          rating: Number(data.rating),
+          reviewCount: Number(data.reviewCount),
+          features: data.features ? data.features.split(',').map(f => f.trim()).filter(f => f) : undefined,
+          brand: data.brand || undefined,
+          paymentLink: data.paymentLink || undefined,
+        };
+
+        if (isEditing && id) {
+          const updatedProduct = await productsApi.update(id, productData);
+          
+          // Update the current image with the new image from the response
+          if (updatedProduct.images && updatedProduct.images.length > 0) {
+            setCurrentImage(updatedProduct.images[0]);
+          }
+          
+          setSuccess('Product updated successfully!');
+        } else {
+          await productsApi.create(productData);
+          setSuccess('Product created successfully!');
+        }
       }
       
       setTimeout(() => navigate('/admin/products'), 1500);
@@ -378,10 +425,10 @@ const AdminProductsEdit: React.FC = () => {
               </div>
               
               <Input
-                label="Payment URL"
+                label="Payment Link"
                 type="url"
-                {...register('paymentUrl')}
-                error={errors.paymentUrl?.message}
+                {...register('paymentLink')}
+                error={errors.paymentLink?.message}
                 placeholder="https://square.com/payment-link"
                 helperText="External payment link (e.g., Square, PayPal)"
               />

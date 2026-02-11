@@ -297,7 +297,9 @@ export const productsApi = {
         price: Number(item.price || 0),
         originalPrice: item.original_price ? Number(item.original_price) : undefined,
         category: String(item.category || 'gear') as ProductCategory,
-        images: Array.isArray(item.images) ? item.images : [],
+        images: Array.isArray(item.images) ? item.images.map(img => 
+          typeof img === 'string' && img.startsWith('/') ? `${API_BASE_URL}${img}` : img
+        ) : [],
         inStock: Boolean(item.in_stock),
         stockQuantity: Number(item.stock_quantity || 0),
         sizes: Array.isArray(item.sizes) ? item.sizes : undefined,
@@ -306,6 +308,7 @@ export const productsApi = {
         reviewCount: Number(item.review_count || 0),
         features: Array.isArray(item.features) ? item.features : undefined,
         brand: item.brand ? String(item.brand) : undefined,
+        paymentLink: item.payment_link ? String(item.payment_link) : undefined,
       }));
     } catch (error) {
       console.error('Failed to fetch products from API:', error);
@@ -335,7 +338,9 @@ export const productsApi = {
         price: Number(item.price || 0),
         originalPrice: item.original_price ? Number(item.original_price) : undefined,
         category: String(item.category || 'gear') as ProductCategory,
-        images: Array.isArray(item.images) ? item.images : [],
+        images: Array.isArray(item.images) ? item.images.map(img => 
+          typeof img === 'string' && img.startsWith('/') ? `${API_BASE_URL}${img}` : img
+        ) : [],
         inStock: Boolean(item.in_stock),
         stockQuantity: Number(item.stock_quantity || 0),
         sizes: Array.isArray(item.sizes) ? item.sizes : undefined,
@@ -344,6 +349,7 @@ export const productsApi = {
         reviewCount: Number(item.review_count || 0),
         features: Array.isArray(item.features) ? item.features : undefined,
         brand: item.brand ? String(item.brand) : undefined,
+        paymentLink: item.payment_link ? String(item.payment_link) : undefined,
       };
     } catch (error) {
       console.error('Failed to fetch product from API:', error);
@@ -374,6 +380,7 @@ export const productsApi = {
           review_count: product.reviewCount,
           features: product.features,
           brand: product.brand,
+          payment_link: product.paymentLink,
         }),
       });
 
@@ -391,7 +398,9 @@ export const productsApi = {
         price: Number(item.price || 0),
         originalPrice: item.original_price ? Number(item.original_price) : undefined,
         category: String(item.category || 'gear') as ProductCategory,
-        images: Array.isArray(item.images) ? item.images : [],
+        images: Array.isArray(item.images) ? item.images.map(img => 
+          typeof img === 'string' && img.startsWith('/') ? `${API_BASE_URL}${img}` : img
+        ) : [],
         inStock: Boolean(item.in_stock),
         stockQuantity: Number(item.stock_quantity || 0),
         sizes: Array.isArray(item.sizes) ? item.sizes : undefined,
@@ -400,6 +409,7 @@ export const productsApi = {
         reviewCount: Number(item.review_count || 0),
         features: Array.isArray(item.features) ? item.features : undefined,
         brand: item.brand ? String(item.brand) : undefined,
+        paymentLink: item.payment_link ? String(item.payment_link) : undefined,
       };
     } catch (error) {
       console.error('Failed to create product via API:', error);
@@ -430,6 +440,7 @@ export const productsApi = {
           review_count: product.reviewCount,
           features: product.features,
           brand: product.brand,
+          payment_link: product.paymentLink,
         }),
       });
 
@@ -447,7 +458,9 @@ export const productsApi = {
         price: Number(item.price || 0),
         originalPrice: item.original_price ? Number(item.original_price) : undefined,
         category: String(item.category || 'gear') as ProductCategory,
-        images: Array.isArray(item.images) ? item.images : [],
+        images: Array.isArray(item.images) ? item.images.map(img => 
+          typeof img === 'string' && img.startsWith('/') ? `${API_BASE_URL}${img}` : img
+        ) : [],
         inStock: Boolean(item.in_stock),
         stockQuantity: Number(item.stock_quantity || 0),
         sizes: Array.isArray(item.sizes) ? item.sizes : undefined,
@@ -456,6 +469,7 @@ export const productsApi = {
         reviewCount: Number(item.review_count || 0),
         features: Array.isArray(item.features) ? item.features : undefined,
         brand: item.brand ? String(item.brand) : undefined,
+        paymentLink: item.payment_link ? String(item.payment_link) : undefined,
       };
     } catch (error) {
       console.error('Failed to update product via API:', error);

@@ -81,7 +81,7 @@ export interface Product {
   reviewCount: number;
   features?: string[];
   brand?: string;
-  paymentUrl?: string;
+  paymentLink?: string;
 }
 
 // News Models
