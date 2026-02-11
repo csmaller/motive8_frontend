@@ -2,6 +2,10 @@
   RewriteEngine On
   RewriteBase /
   
+  # Remove trailing dot from domain (fixes CORS issues)
+  RewriteCond %{HTTP_HOST} \.$
+  RewriteRule ^(.*)$ http://s1082203226.onlinehome.us/$1 [R=301,L]
+  
   # Don't rewrite files or directories
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
