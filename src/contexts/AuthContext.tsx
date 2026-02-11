@@ -21,7 +21,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       if (token && userData) {
         try {
           const parsedUser = JSON.parse(userData);
-          console.log(parsedUser)
+        
           setUser(parsedUser);
         } catch (error) {
           console.error('Error parsing user data:', error);
@@ -40,8 +40,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setIsLoading(true);
     
     try {
-      // Mock API call - replace with actual API endpoint
-      const response = await fetch('/api/admin/login', {
+      // Import API_BASE_URL
+      const { API_BASE_URL } = await import('../config/api');
+      
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
