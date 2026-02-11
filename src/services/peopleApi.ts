@@ -21,11 +21,25 @@ interface ApiPersonResponse {
   phone?: string;
   image?: string;
   image_url?: string;
+  specialization?: string; // Backend uses singular
   specializations?: string[];
 }
 
 // Export types for use in other files
 export type { CreateUserData, UpdateUserData } from '../types';
+
+// Helper function to parse specializations from API response
+const parseSpecializations = (item: ApiPersonResponse): string[] => {
+  // If specializations array exists, use it
+  if (item.specializations && Array.isArray(item.specializations)) {
+    return item.specializations;
+  }
+  // If specialization string exists, split by comma
+  if (item.specialization && typeof item.specialization === 'string') {
+    return item.specialization.split(',').map(s => s.trim()).filter(s => s.length > 0);
+  }
+  return [];
+};
 
 export const peopleApi = {
   // Get all coaches (users with specializations)
@@ -61,7 +75,7 @@ export const peopleApi = {
           lastName: item.last_name || item.lastName || '',
           phone: item.phone,
           image: item.image_url || item.image,
-          specializations: item.specializations || [],
+          specializations: parseSpecializations(item),
           createdAt: new Date(item.created_at || item.createdAt || Date.now()),
           updatedAt: new Date(item.updated_at || item.updatedAt || Date.now()),
         }
@@ -109,7 +123,7 @@ export const peopleApi = {
           lastName: item.last_name || item.lastName || '',
           phone: item.phone,
           image: item.image_url || item.image,
-          specializations: item.specializations || [],
+          specializations: parseSpecializations(item),
           createdAt: new Date(item.created_at || item.createdAt || Date.now()),
           updatedAt: new Date(item.updated_at || item.updatedAt || Date.now()),
         }
@@ -155,7 +169,7 @@ export const peopleApi = {
           lastName: item.last_name || item.lastName || '',
           phone: item.phone,
           image: item.image_url || item.image,
-          specializations: item.specializations || [],
+          specializations: parseSpecializations(item),
           createdAt: new Date(item.created_at || item.createdAt || Date.now()),
           updatedAt: new Date(item.updated_at || item.updatedAt || Date.now()),
         }
@@ -173,29 +187,59 @@ export const peopleApi = {
   // Create new user (creates both person and user records)
   create: async (userData: CreateUserData): Promise<UserProfile> => {
     try {
-      // Transform our interface to match API expectations
-      // Backend expects nested structure with user and person data
-      const apiData = {
-        // User fields
-        user: {
-          username: userData.username,
-          email: userData.email,
-          password: userData.password,
-          user_type: "coach",
-        },
-        // Person fields
-        person: {
-          first_name: userData.firstName,
-          last_name: userData.lastName,
-          phone: userData.phone,
-          image_url: userData.image,
-          specializations: userData.specializations || [],
-        }
+      // Step 1: Create the user first
+      const userPayload = {
+        username: userData.username,
+        email: userData.email,
+        password: userData.password,
+        user_type: "coach",
       };
 
-      console.log('Creating person with data:', apiData);
-      console.log('API URL:', `${API_BASE_URL}/people`);
-      console.log('Auth token:', localStorage.getItem('admin_token') ? 'Present' : 'Missing');
+      console.log('Step 1: Creating user with data:', userPayload);
+      
+      const userResponse = await fetch(`${API_BASE_URL}/users`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+        },
+        body: JSON.stringify(userPayload),
+      });
+
+      console.log('User creation response status:', userResponse.status);
+
+      if (!userResponse.ok) {
+        const contentType = userResponse.headers.get('content-type');
+        let errorMessage = `Failed to create user - HTTP ${userResponse.status}: ${userResponse.statusText}`;
+        
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await userResponse.json().catch(() => ({}));
+          errorMessage = `Failed to create user - HTTP ${userResponse.status}: ${errorData.message || userResponse.statusText}`;
+        } else {
+          const textResponse = await userResponse.text();
+          console.error('Non-JSON response from user API:', textResponse.substring(0, 200));
+        }
+        
+        throw new Error(errorMessage);
+      }
+
+      const createdUser = await userResponse.json();
+      const userId = createdUser.id || createdUser.user_id;
+      
+      console.log('User created with ID:', userId);
+
+      // Step 2: Create the person record with the user_id
+      const personPayload = {
+        user_id: userId,
+        first_name: userData.firstName,
+        last_name: userData.lastName,
+        email: userData.email,
+        phone: userData.phone,
+        image_url: userData.image,
+        specialization: userData.specializations?.join(', ') || '', // Backend uses singular 'specialization'
+      };
+
+      console.log('Step 2: Creating person with data:', personPayload);
 
       const response = await fetch(`${API_BASE_URL}/people`, {
         method: 'POST',
@@ -203,23 +247,23 @@ export const peopleApi = {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
         },
-        body: JSON.stringify(apiData),
+        body: JSON.stringify(personPayload),
       });
 
-      console.log('Response status:', response.status);
+      console.log('Person creation response status:', response.status);
       console.log('Response URL:', response.url);
       console.log('Response redirected:', response.redirected);
 
       if (!response.ok) {
         const contentType = response.headers.get('content-type');
-        let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        let errorMessage = `Failed to create person - HTTP ${response.status}: ${response.statusText}`;
         
         if (contentType && contentType.includes('application/json')) {
           const errorData = await response.json().catch(() => ({}));
-          errorMessage = `HTTP ${response.status}: ${errorData.message || response.statusText}`;
+          errorMessage = `Failed to create person - HTTP ${response.status}: ${errorData.message || response.statusText}`;
         } else {
           const textResponse = await response.text();
-          console.error('Non-JSON response from API:', textResponse.substring(0, 200));
+          console.error('Non-JSON response from person API:', textResponse.substring(0, 200));
         }
         
         throw new Error(errorMessage);
@@ -243,7 +287,7 @@ export const peopleApi = {
           lastName: item.last_name || item.lastName || '',
           phone: item.phone,
           image: item.image_url || item.image,
-          specializations: item.specializations || [],
+          specializations: parseSpecializations(item),
           createdAt: new Date(item.created_at || item.createdAt || Date.now()),
           updatedAt: new Date(item.updated_at || item.updatedAt || Date.now()),
         }
@@ -279,13 +323,14 @@ export const peopleApi = {
   update: async (id: string, userData: UpdateUserData): Promise<UserProfile> => {
     try {
       // Transform our interface to match API expectations
+      // Backend expects flat structure with optional fields
       const apiData = {
         first_name: userData.firstName,
         last_name: userData.lastName,
-        phone: userData.phone,
-        image_url: userData.image, // Backend uses image_url
-        specializations: userData.specializations,
         email: userData.email,
+        phone: userData.phone,
+        image_url: userData.image,
+        specialization: userData.specializations?.join(', ') || '', // Backend uses singular 'specialization'
         ...(userData.password && { password: userData.password }),
       };
 
@@ -337,7 +382,7 @@ export const peopleApi = {
           lastName: item.last_name || item.lastName || '',
           phone: item.phone,
           image: item.image_url || item.image,
-          specializations: item.specializations || [],
+          specializations: parseSpecializations(item),
           createdAt: new Date(item.created_at || item.createdAt || Date.now()),
           updatedAt: new Date(item.updated_at || item.updatedAt || Date.now()),
         }
