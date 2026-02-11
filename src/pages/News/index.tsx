@@ -1,5 +1,4 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { mockNewsArticles } from '../../data/mockData';
 import { newsApi } from '../../services/adminApi';
 import type { NewsCategory, NewsArticle } from '../../types';
 import Card from '../../components/ui/Card';
@@ -10,7 +9,6 @@ const News: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<NewsCategory | 'all'>('all');
   const [newsArticles, setNewsArticles] = useState<NewsArticle[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadNews = async () => {
@@ -18,11 +16,9 @@ const News: React.FC = () => {
         setIsLoading(true);
         const articles = await newsApi.getAll();
         setNewsArticles(articles);
-        setError(null);
       } catch (err) {
-        console.error('Failed to load news from API, using mock data:', err);
-        setNewsArticles(mockNewsArticles);
-        setError('Using sample data - API unavailable');
+        console.error('Failed to load news from API:', err);
+        setNewsArticles([]);
       } finally {
         setIsLoading(false);
       }
@@ -91,11 +87,6 @@ const News: React.FC = () => {
                 <p className="text-xl md:text-2xl opacity-90">
                   Stay updated with our latest achievements and announcements
                 </p>
-                {error && (
-                  <p className="text-sm mt-2 opacity-75">
-                    {error}
-                  </p>
-                )}
               </div>
             </div>
           </div>
