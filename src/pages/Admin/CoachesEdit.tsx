@@ -132,7 +132,18 @@ const AdminCoachesEdit: React.FC = () => {
       };
 
       if (isEditing && id) {
-        await peopleApi.update(id, userData as UpdateUserData);
+        const updatedCoach = await peopleApi.update(id, userData as UpdateUserData);
+        console.log('Updated coach response:', updatedCoach);
+        
+        // Update the current image with the new image from the response
+        if (updatedCoach.person.image) {
+          setCurrentImage(updatedCoach.person.image);
+          console.log('Updated current image to:', updatedCoach.person.image);
+        }
+        
+        // Clear the file object since it's been uploaded
+        setImageFile(null);
+        
         setSuccess('Coach updated successfully!');
         setTimeout(() => navigate('/admin/coaches'), 1500);
       } else {
@@ -141,7 +152,8 @@ const AdminCoachesEdit: React.FC = () => {
           ...userData,
           username: userData.email.split('@')[0] // Generate username from email
         };
-        await peopleApi.create(createData as CreateUserData);
+        const createdCoach = await peopleApi.create(createData as CreateUserData);
+        console.log('Created coach response:', createdCoach);
         setSuccess('Coach created successfully!');
         setTimeout(() => navigate('/admin/coaches'), 1500);
       }
