@@ -20,6 +20,7 @@ interface ApiPersonResponse {
   lastName?: string;
   phone?: string;
   image?: string;
+  image_url?: string;
   specializations?: string[];
 }
 
@@ -59,7 +60,7 @@ export const peopleApi = {
           firstName: item.first_name || item.firstName || '',
           lastName: item.last_name || item.lastName || '',
           phone: item.phone,
-          image: item.image,
+          image: item.image_url || item.image,
           specializations: item.specializations || [],
           createdAt: new Date(item.created_at || item.createdAt || Date.now()),
           updatedAt: new Date(item.updated_at || item.updatedAt || Date.now()),
@@ -107,7 +108,7 @@ export const peopleApi = {
           firstName: item.first_name || item.firstName || '',
           lastName: item.last_name || item.lastName || '',
           phone: item.phone,
-          image: item.image,
+          image: item.image_url || item.image,
           specializations: item.specializations || [],
           createdAt: new Date(item.created_at || item.createdAt || Date.now()),
           updatedAt: new Date(item.updated_at || item.updatedAt || Date.now()),
@@ -153,7 +154,7 @@ export const peopleApi = {
           firstName: item.first_name || item.firstName || '',
           lastName: item.last_name || item.lastName || '',
           phone: item.phone,
-          image: item.image,
+          image: item.image_url || item.image,
           specializations: item.specializations || [],
           createdAt: new Date(item.created_at || item.createdAt || Date.now()),
           updatedAt: new Date(item.updated_at || item.updatedAt || Date.now()),
@@ -216,7 +217,7 @@ export const peopleApi = {
           firstName: item.first_name || item.firstName || '',
           lastName: item.last_name || item.lastName || '',
           phone: item.phone,
-          image: item.image,
+          image: item.image_url || item.image,
           specializations: item.specializations || [],
           createdAt: new Date(item.created_at || item.createdAt || Date.now()),
           updatedAt: new Date(item.updated_at || item.updatedAt || Date.now()),
@@ -294,7 +295,7 @@ export const peopleApi = {
           firstName: item.first_name || item.firstName || '',
           lastName: item.last_name || item.lastName || '',
           phone: item.phone,
-          image: item.image,
+          image: item.image_url || item.image,
           specializations: item.specializations || [],
           createdAt: new Date(item.created_at || item.createdAt || Date.now()),
           updatedAt: new Date(item.updated_at || item.updatedAt || Date.now()),
