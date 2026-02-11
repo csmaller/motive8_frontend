@@ -1,7 +1,6 @@
 import React from 'react';
 import Card from '../../components/ui/Card';
 import ContactForm from '../../components/forms/ContactForm';
-import type { ContactFormData } from '../../types';
 
 const Contact: React.FC = () => {
   const contactInfo = [
@@ -37,17 +36,6 @@ const Contact: React.FC = () => {
       action: 'https://maps.google.com/?q=123+Athletic+Drive+Sports+City+SC'
     }
   ];
-
-  const handleContactFormSubmit = async (data: ContactFormData) => {
-    // In a real application, this would send the data to your backend API
-    console.log('Contact form submission:', data);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
-    // You could also send an email or save to a database here
-    // Example: await sendContactEmail(data);
-  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -113,7 +101,7 @@ const Contact: React.FC = () => {
           </div>
           
           <Card>
-            <ContactForm onSubmit={handleContactFormSubmit} />
+            <ContactForm />
           </Card>
         </div>
       </section>

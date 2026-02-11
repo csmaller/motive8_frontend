@@ -183,6 +183,7 @@ export const generateMockContactForm = (): ContactFormData => ({
   name: 'John Doe',
   email: 'john.doe@example.com',
   phone: '(555) 123-4567',
+  subject: 'Interested in joining',
   message: 'I am interested in joining your triathlon team and would like more information about training programs.'
 });
 

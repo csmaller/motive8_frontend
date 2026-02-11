@@ -1,18 +1,13 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { API_BASE_URL } from '../../config/api';
 import Input from '../ui/Input';
 import TextArea from '../ui/Textarea';
 import Button from '../ui/Button';
 import StatusMessage from '../ui/StatusMessage';
 import type { ContactFormData } from '../../types';
-import { contactFormValidation, formatFormData } from '../../utils/validation';
-import { handleError, simulateNetworkRequest, retryOperation, logErrorToService } from '../../utils/errorHandling';
 
-interface ContactFormProps {
-  onSubmit?: (data: ContactFormData) => Promise<void>;
-}
-
-const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
+const ContactForm: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [submitMessage, setSubmitMessage] = useState('');
@@ -30,32 +25,36 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
     setSubmitMessage('');
 
     try {
-      const formattedData = formatFormData(data);
-      
-      if (onSubmit) {
-        await retryOperation(() => onSubmit(formattedData), 2);
-      } else {
-        // Default submission handler with error simulation for development
-        await simulateNetworkRequest(formattedData, {
-          delay: 1500,
-          failureRate: 0 // Set to 0.3 for testing error handling
-        });
-        console.log('Contact form submitted:', formattedData);
+      const response = await fetch(`${API_BASE_URL}/contact`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: JSON.stringify({
+          name: data.name,
+          email: data.email,
+          phone: data.phone || null,
+          subject: data.subject,
+          message: data.message,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
       }
+
+      const result = await response.json();
+      console.log('Contact form submitted successfully:', result);
 
       setSubmitStatus('success');
       setSubmitMessage('Thank you for your message! We\'ll get back to you soon.');
       reset();
     } catch (error) {
-      const appError = handleError(error);
+      console.error('Contact form submission error:', error);
       setSubmitStatus('error');
-      setSubmitMessage(appError.message);
-      
-      // Log error for monitoring
-      logErrorToService(error instanceof Error ? error : new Error(String(error)), {
-        formType: 'contact',
-        formData: data
-      });
+      setSubmitMessage(error instanceof Error ? error.message : 'Failed to send message. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
@@ -67,7 +66,10 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
         <Input
           label="Full Name *"
           placeholder="Enter your full name"
-          {...register('name', contactFormValidation.name)}
+          {...register('name', { 
+            required: 'Name is required',
+            maxLength: { value: 255, message: 'Name must be less than 255 characters' }
+          })}
           error={errors.name?.message}
         />
         
@@ -75,7 +77,13 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
           label="Email Address *"
           type="email"
           placeholder="Enter your email address"
-          {...register('email', contactFormValidation.email)}
+          {...register('email', { 
+            required: 'Email is required',
+            pattern: {
+              value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+              message: 'Invalid email address'
+            }
+          })}
           error={errors.email?.message}
         />
       </div>
@@ -84,16 +92,31 @@ const ContactForm: React.FC<ContactFormProps> = ({ onSubmit }) => {
         label="Phone Number"
         type="tel"
         placeholder="Enter your phone number (optional)"
-        {...register('phone', contactFormValidation.phone)}
+        {...register('phone', {
+          maxLength: { value: 20, message: 'Phone number must be less than 20 characters' }
+        })}
         error={errors.phone?.message}
         helperText="We'll only use this to contact you about your inquiry"
+      />
+
+      <Input
+        label="Subject *"
+        placeholder="What is your inquiry about?"
+        {...register('subject', { 
+          required: 'Subject is required',
+          maxLength: { value: 255, message: 'Subject must be less than 255 characters' }
+        })}
+        error={errors.subject?.message}
       />
 
       <TextArea
         label="Message *"
         placeholder="Tell us about your interest in triathlon training, questions about our programs, or how we can help you achieve your goals..."
         rows={6}
-        {...register('message', contactFormValidation.message)}
+        {...register('message', { 
+          required: 'Message is required',
+          maxLength: { value: 5000, message: 'Message must be less than 5000 characters' }
+        })}
         error={errors.message?.message}
         helperText="Please provide as much detail as possible so we can best assist you"
       />
