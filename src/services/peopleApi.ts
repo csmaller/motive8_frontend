@@ -403,13 +403,19 @@ export const peopleApi = {
 
       const item: ApiPersonResponse = await response.json();
       
+      console.log('Update response:', item);
+      
+      // Extract email from nested user object if present
+      const email = item.user?.email || item.email || '';
+      const userId = item.user?.id || item.user_id || item.id || '';
+      
       // Transform the API response back to our interface
       return {
-        id: item.id || item.user_id || '',
+        id: String(userId),
         personId: item.person_id || item.id || '',
-        username: item.username || '',
+        username: item.username || email.split('@')[0] || '',
         user_type: item.user_type ||"",
-        email: item.email || '',
+        email: email,
         createdAt: new Date(item.created_at || item.createdAt || Date.now()),
         updatedAt: new Date(item.updated_at || item.updatedAt || Date.now()),
         lastLogin: item.last_login ? new Date(item.last_login) : undefined,
@@ -417,7 +423,7 @@ export const peopleApi = {
           id: item.person_id || item.id || '',
           firstName: item.first_name || item.firstName || '',
           lastName: item.last_name || item.lastName || '',
-          phone: item.phone,
+          phone: item.phone || undefined,
           image: item.image_url || item.image,
           specializations: parseSpecializations(item),
           createdAt: new Date(item.created_at || item.createdAt || Date.now()),

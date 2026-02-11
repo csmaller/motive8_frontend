@@ -58,11 +58,23 @@ const AdminCoachesEdit: React.FC = () => {
       setIsLoading(true);
       const coach = await peopleApi.getById(coachId);
       
+      console.log('Loaded coach data:', coach);
+      
+      // Format phone number for display
+      const formatPhoneForDisplay = (phone: string | undefined): string => {
+        if (!phone) return '';
+        const numbers = phone.replace(/\D/g, '');
+        if (numbers.length === 10) {
+          return `${numbers.slice(0, 3)}-${numbers.slice(3, 6)}-${numbers.slice(6)}`;
+        }
+        return phone;
+      };
+      
       reset({
         firstName: coach.person.firstName,
         lastName: coach.person.lastName,
         email: coach.email,
-        phone: coach.person.phone || '',
+        phone: formatPhoneForDisplay(coach.person.phone),
         specializations: coach.person.specializations?.join(', ') || '',
         password: '',
         confirmPassword: ''
@@ -70,6 +82,7 @@ const AdminCoachesEdit: React.FC = () => {
       
       // Set current image
       setCurrentImage(coach.person.image || null);
+      console.log('Set current image to:', coach.person.image);
     } catch (error) {
       console.error('Failed to load coach:', error);
       setError('Failed to load coach');
