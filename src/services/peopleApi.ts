@@ -239,7 +239,6 @@ export const peopleApi = {
         user_id: userId,
         first_name: userData.firstName,
         last_name: userData.lastName,
-        email: userData.email,
         phone: userData.phone,
         image_url: userData.image,
         specialization: userData.specializations?.join(', ') || '', // Backend uses singular 'specialization'
@@ -342,7 +341,6 @@ export const peopleApi = {
       const apiData = {
         first_name: userData.firstName,
         last_name: userData.lastName,
-        email: userData.email,
         phone: userData.phone,
         image_url: userData.image,
         specialization: userData.specializations?.join(', ') || '', // Backend uses singular 'specialization'
