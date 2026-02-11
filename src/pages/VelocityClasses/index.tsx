@@ -3,16 +3,14 @@ import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Image from '../../components/ui/Image';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
-import RegistrationForm from '../../components/forms/RegistrationForm';
 import { velocityClassesApi } from '../../services/adminApi';
-import type { VelocityClass, ExperienceLevel, RegistrationFormData } from '../../types';
+import type { VelocityClass, ExperienceLevel } from '../../types';
 import velocityImage from '../../assets/img/layout/velocity.png';
+
+const REGISTRATION_URL = 'https://app.vqvelocity.com/join?a=4o1rcm';
 
 const VelocityClasses: React.FC = () => {
   const [selectedLevel, setSelectedLevel] = useState<ExperienceLevel | 'all'>('all');
-  const [showRegistrationForm, setShowRegistrationForm] = useState(false);
-  const [selectedClassId, setSelectedClassId] = useState<string | null>(null);
-  const [isFormLoading, setIsFormLoading] = useState(false);
   const [classes, setClasses] = useState<VelocityClass[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -36,44 +34,8 @@ const VelocityClasses: React.FC = () => {
     ? classes 
     : classes.filter(cls => cls.level === selectedLevel);
 
-  const handleRegistrationSubmit = async (data: RegistrationFormData) => {
-    // In a real application, this would send the data to your backend API
-    console.log('Registration form submission:', data);
-    console.log('Selected class ID:', selectedClassId);
-    
-    setIsFormLoading(true);
-    
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Close the registration form after successful submission
-      setTimeout(() => {
-        setShowRegistrationForm(false);
-        setSelectedClassId(null);
-      }, 3000);
-    } finally {
-      setIsFormLoading(false);
-    }
-  };
-
-  const handleRegisterClick = async (classId: string) => {
-    setIsFormLoading(true);
-    setSelectedClassId(classId);
-    
-    // Simulate loading delay for better UX
-    await new Promise(resolve => setTimeout(resolve, 300));
-    
-    setShowRegistrationForm(true);
-    setIsFormLoading(false);
-    
-    // Scroll to registration form
-    setTimeout(() => {
-      document.getElementById('registration-form')?.scrollIntoView({ 
-        behavior: 'smooth',
-        block: 'start'
-      });
-    }, 100);
+  const handleRegisterClick = () => {
+    window.open(REGISTRATION_URL, '_blank', 'noopener,noreferrer');
   };
 
   const getLevelColor = (level: ExperienceLevel) => {
@@ -236,14 +198,12 @@ const VelocityClasses: React.FC = () => {
           {/* Action Button */}
           <div className="mt-auto">
             <Button
-              variant={isFull ? 'outline' : 'primary'}
+              variant="primary"
               size="sm"
               className="w-full"
-              disabled={isFull || isFormLoading}
-              loading={isFormLoading && selectedClassId === velocityClass.id}
-              onClick={() => isFull ? null : handleRegisterClick(velocityClass.id)}
+              onClick={handleRegisterClick}
             >
-              {isFull ? 'Class Full - Join Waitlist' : 'Register for Class'}
+              Register for Class
             </Button>
           </div>
         </div>
@@ -320,9 +280,7 @@ const VelocityClasses: React.FC = () => {
               <Button 
                 variant="outline" 
                 size="lg"
-                loading={isFormLoading}
-                disabled={isFormLoading}
-                onClick={() => setShowRegistrationForm(true)}
+                onClick={handleRegisterClick}
               >
                 Register Now
               </Button>
@@ -384,26 +342,6 @@ const VelocityClasses: React.FC = () => {
         )}
       </section>
 
-      {/* Registration Form Section */}
-      {showRegistrationForm && (
-        <section id="registration-form" className="bg-white border-2 border-primary-200 rounded-lg p-8">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">Class Registration</h2>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowRegistrationForm(false)}
-            >
-              Close Form
-            </Button>
-          </div>
-          <RegistrationForm 
-            classId={selectedClassId || undefined}
-            onSubmit={handleRegistrationSubmit}
-          />
-        </section>
-      )}
-
       {/* Why Choose Velocity Classes */}
       <section className="bg-gray-50 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-12 rounded-lg">
         <div className="max-w-4xl mx-auto">
@@ -460,9 +398,7 @@ const VelocityClasses: React.FC = () => {
         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
           <Button 
             size="lg"
-            loading={isFormLoading}
-            disabled={isFormLoading}
-            onClick={() => setShowRegistrationForm(true)}
+            onClick={handleRegisterClick}
           >
             Register for a Class
           </Button>
