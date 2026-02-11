@@ -186,6 +186,10 @@ export const peopleApi = {
         user_type:"coach",
       };
 
+      console.log('Creating person with data:', apiData);
+      console.log('API URL:', `${API_BASE_URL}/people`);
+      console.log('Auth token:', localStorage.getItem('admin_token') ? 'Present' : 'Missing');
+
       const response = await fetch(`${API_BASE_URL}/people`, {
         method: 'POST',
         headers: {
@@ -195,9 +199,23 @@ export const peopleApi = {
         body: JSON.stringify(apiData),
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response URL:', response.url);
+      console.log('Response redirected:', response.redirected);
+
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(`HTTP ${response.status}: ${errorData.message || response.statusText}`);
+        const contentType = response.headers.get('content-type');
+        let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await response.json().catch(() => ({}));
+          errorMessage = `HTTP ${response.status}: ${errorData.message || response.statusText}`;
+        } else {
+          const textResponse = await response.text();
+          console.error('Non-JSON response from API:', textResponse.substring(0, 200));
+        }
+        
+        throw new Error(errorMessage);
       }
 
       const item: ApiPersonResponse = await response.json();
@@ -264,6 +282,9 @@ export const peopleApi = {
         ...(userData.password && { password: userData.password }),
       };
 
+      console.log('Updating person with data:', apiData);
+      console.log('API URL:', `${API_BASE_URL}/people/${id}`);
+
       const response = await fetch(`${API_BASE_URL}/people/${id}`, {
         method: 'PUT',
         headers: {
@@ -273,9 +294,22 @@ export const peopleApi = {
         body: JSON.stringify(apiData),
       });
 
+      console.log('Response status:', response.status);
+      console.log('Response URL:', response.url);
+
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(`HTTP ${response.status}: ${errorData.message || response.statusText}`);
+        const contentType = response.headers.get('content-type');
+        let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+        
+        if (contentType && contentType.includes('application/json')) {
+          const errorData = await response.json().catch(() => ({}));
+          errorMessage = `HTTP ${response.status}: ${errorData.message || response.statusText}`;
+        } else {
+          const textResponse = await response.text();
+          console.error('Non-JSON response from API:', textResponse.substring(0, 200));
+        }
+        
+        throw new Error(errorMessage);
       }
 
       const item: ApiPersonResponse = await response.json();
