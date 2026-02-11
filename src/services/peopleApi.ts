@@ -67,6 +67,22 @@ interface ApiPersonResponse {
 // Export types for use in other files
 export type { CreateUserData, UpdateUserData } from '../types';
 
+// Helper function to format phone numbers to XXX-XXX-XXXX
+const formatPhoneNumber = (phone: string | undefined): string | undefined => {
+  if (!phone) return undefined;
+  
+  // Remove all non-numeric characters
+  const numbers = phone.replace(/\D/g, '');
+  
+  // Format as XXX-XXX-XXXX if we have 10 digits
+  if (numbers.length === 10) {
+    return `${numbers.slice(0, 3)}-${numbers.slice(3, 6)}-${numbers.slice(6)}`;
+  }
+  
+  // Return original if not 10 digits
+  return phone;
+};
+
 // Helper function to parse specializations from API response
 const parseSpecializations = (item: ApiPersonResponse): string[] => {
   // If specializations array exists, use it
@@ -112,7 +128,7 @@ export const peopleApi = {
           id: item.person_id || item.id || '',
           firstName: item.first_name || item.firstName || '',
           lastName: item.last_name || item.lastName || '',
-          phone: item.phone,
+          phone: formatPhoneNumber(item.phone),
           image: item.image_url || item.image,
           specializations: parseSpecializations(item),
           createdAt: new Date(item.created_at || item.createdAt || Date.now()),
@@ -160,7 +176,7 @@ export const peopleApi = {
           id: item.person_id || item.id || '',
           firstName: item.first_name || item.firstName || '',
           lastName: item.last_name || item.lastName || '',
-          phone: item.phone,
+          phone: formatPhoneNumber(item.phone),
           image: item.image_url || item.image,
           specializations: parseSpecializations(item),
           createdAt: new Date(item.created_at || item.createdAt || Date.now()),
@@ -210,7 +226,7 @@ export const peopleApi = {
           id: item.person_id || item.id || '',
           firstName: item.first_name || item.firstName || '',
           lastName: item.last_name || item.lastName || '',
-          phone: item.phone || undefined,
+          phone: formatPhoneNumber(item.phone),
           image: item.image_url || item.image,
           specializations: parseSpecializations(item),
           createdAt: new Date(item.created_at || item.createdAt || Date.now()),
@@ -349,7 +365,7 @@ export const peopleApi = {
           id: item.person_id || item.id || '',
           firstName: item.first_name || item.firstName || '',
           lastName: item.last_name || item.lastName || '',
-          phone: item.phone,
+          phone: formatPhoneNumber(item.phone),
           image: item.image_url || item.image,
           specializations: parseSpecializations(item),
           createdAt: new Date(item.created_at || item.createdAt || Date.now()),
@@ -463,7 +479,7 @@ export const peopleApi = {
           id: String(item.person_id || item.id || ''),
           firstName: item.first_name || item.firstName || '',
           lastName: item.last_name || item.lastName || '',
-          phone: item.phone || undefined,
+          phone: formatPhoneNumber(item.phone),
           image: item.image_url || item.image,
           specializations: parseSpecializations(item as ApiPersonResponse),
           createdAt: new Date(item.created_at || item.createdAt || Date.now()),
@@ -486,7 +502,7 @@ export const peopleApi = {
           ...existingUser.person,
           firstName: userData.firstName || existingUser.person.firstName,
           lastName: userData.lastName || existingUser.person.lastName,
-          phone: userData.phone || existingUser.person.phone,
+          phone: formatPhoneNumber(userData.phone) || existingUser.person.phone,
           image: userData.image || existingUser.person.image,
           specializations: userData.specializations || existingUser.person.specializations,
           updatedAt: new Date(),
