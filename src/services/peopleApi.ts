@@ -187,9 +187,8 @@ export const peopleApi = {
   // Create new user (creates both person and user records)
   create: async (userData: CreateUserData): Promise<UserProfile> => {
     try {
-      // Step 1: Create the user first
+      // Step 1: Create the user first (only email, password, user_type)
       const userPayload = {
-        username: userData.username,
         email: userData.email,
         password: userData.password,
         user_type: "coach",
@@ -228,7 +227,7 @@ export const peopleApi = {
       
       console.log('User created with ID:', userId);
 
-      // Step 2: Create the person record with the user_id
+      // Step 2: Create the person record with the user_id and name fields
       const personPayload = {
         user_id: userId,
         first_name: userData.firstName,
