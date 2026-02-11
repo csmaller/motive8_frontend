@@ -5,7 +5,7 @@ import StatusMessage from './StatusMessage';
 interface ImageUploaderProps {
   label?: string;
   currentImage?: string;
-  onImageChange: (imageUrl: string | null) => void;
+  onImageChange: (imageUrl: string | null, file?: File | null) => void;
   error?: string;
   helperText?: string;
   accept?: string;
@@ -56,9 +56,9 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       // For now, we'll simulate an upload and use the object URL
       await simulateUpload(file);
       
-      // In production, this would be the actual uploaded image URL
+      // Pass both the preview URL and the actual File object
       const uploadedUrl = `/uploads/images/${Date.now()}-${file.name}`;
-      onImageChange(uploadedUrl);
+      onImageChange(uploadedUrl, file);
       
     } catch (error) {
       console.error('Upload failed:', error);
@@ -81,7 +81,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
 
   const handleRemoveImage = () => {
     setPreviewUrl(null);
-    onImageChange(null);
+    onImageChange(null, null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }

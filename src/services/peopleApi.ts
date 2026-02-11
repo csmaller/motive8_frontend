@@ -235,24 +235,31 @@ export const peopleApi = {
       }
 
       // Step 2: Create the person record with the user_id and name fields
-      const personPayload = {
-        user_id: userId,
-        first_name: userData.firstName,
-        last_name: userData.lastName,
-        phone: userData.phone,
-        image_url: userData.image,
-        specialization: userData.specializations?.join(', ') || '', // Backend uses singular 'specialization'
-      };
+      // Use FormData to send file upload
+      const formData = new FormData();
+      formData.append('user_id', userId.toString());
+      formData.append('first_name', userData.firstName);
+      formData.append('last_name', userData.lastName);
+      if (userData.phone) formData.append('phone', userData.phone);
+      if (userData.specializations) {
+        formData.append('specialization', userData.specializations.join(', '));
+      }
+      
+      // Add the image file if provided
+      if (userData.imageFile) {
+        formData.append('image', userData.imageFile);
+        console.log('Adding image file to form data:', userData.imageFile.name);
+      }
 
-      console.log('Step 2: Creating person with data:', personPayload);
+      console.log('Step 2: Creating person with FormData');
 
       const response = await fetch(`${API_BASE_URL}/people`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+          // Don't set Content-Type - let browser set it with boundary for multipart/form-data
         },
-        body: JSON.stringify(personPayload),
+        body: formData,
         redirect: 'manual', // Don't follow redirects automatically
       });
 
@@ -336,27 +343,32 @@ export const peopleApi = {
   // Update user (updates both person and user records)
   update: async (id: string, userData: UpdateUserData): Promise<UserProfile> => {
     try {
-      // Transform our interface to match API expectations
-      // Backend expects flat structure with optional fields
-      const apiData = {
-        first_name: userData.firstName,
-        last_name: userData.lastName,
-        phone: userData.phone,
-        image_url: userData.image,
-        specialization: userData.specializations?.join(', ') || '', // Backend uses singular 'specialization'
-        ...(userData.password && { password: userData.password }),
-      };
+      // Use FormData to send file upload
+      const formData = new FormData();
+      if (userData.firstName) formData.append('first_name', userData.firstName);
+      if (userData.lastName) formData.append('last_name', userData.lastName);
+      if (userData.phone) formData.append('phone', userData.phone);
+      if (userData.specializations) {
+        formData.append('specialization', userData.specializations.join(', '));
+      }
+      if (userData.password) formData.append('password', userData.password);
+      
+      // Add the image file if provided
+      if (userData.imageFile) {
+        formData.append('image', userData.imageFile);
+        console.log('Adding image file to form data:', userData.imageFile.name);
+      }
 
-      console.log('Updating person with data:', apiData);
+      console.log('Updating person with FormData');
       console.log('API URL:', `${API_BASE_URL}/people/${id}`);
 
       const response = await fetch(`${API_BASE_URL}/people/${id}`, {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+          // Don't set Content-Type - let browser set it with boundary for multipart/form-data
         },
-        body: JSON.stringify(apiData),
+        body: formData,
       });
 
       console.log('Response status:', response.status);

@@ -31,6 +31,7 @@ const AdminCoachesEdit: React.FC = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [currentImage, setCurrentImage] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   const {
     register,
@@ -112,6 +113,7 @@ const AdminCoachesEdit: React.FC = () => {
         email: data.email,
         phone: data.phone || undefined,
         image: currentImage ?? undefined,
+        imageFile: imageFile || undefined, // Pass the File object
         specializations: specializationsArray,
         ...(data.password && { password: data.password })
       };
@@ -195,7 +197,10 @@ const AdminCoachesEdit: React.FC = () => {
               <ImageUploader
                 label="Coach Photo"
                 currentImage={currentImage ?? undefined}
-                onImageChange={setCurrentImage}
+                onImageChange={(url, file) => {
+                  setCurrentImage(url);
+                  setImageFile(file || null);
+                }}
                 helperText="Upload a professional photo of the coach (max 5MB)"
                 maxSize={5}
               />

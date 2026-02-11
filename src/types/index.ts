@@ -160,6 +160,7 @@ export interface CreateUserData {
   lastName: string;
   phone?: string;
   image?: string;
+  imageFile?: File; // Actual file for upload
   specializations?: string[];
   // User data
   username: string;
@@ -176,6 +177,7 @@ export interface UpdateUserData {
   lastName?: string;
   phone?: string;
   image?: string;
+  imageFile?: File; // Actual file for upload
   specializations?: string[];
   // User data
   email?: string;
