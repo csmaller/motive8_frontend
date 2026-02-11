@@ -1,18 +1,42 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { mockNewsArticles } from '../../data/mockData';
-import type { NewsCategory } from '../../types';
+import { newsApi } from '../../services/adminApi';
+import type { NewsCategory, NewsArticle } from '../../types';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
+import LoadingSpinner from '../../components/ui/LoadingSpinner';
 
 const News: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<NewsCategory | 'all'>('all');
+  const [newsArticles, setNewsArticles] = useState<NewsArticle[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadNews = async () => {
+      try {
+        setIsLoading(true);
+        const articles = await newsApi.getAll();
+        setNewsArticles(articles);
+        setError(null);
+      } catch (err) {
+        console.error('Failed to load news from API, using mock data:', err);
+        setNewsArticles(mockNewsArticles);
+        setError('Using sample data - API unavailable');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadNews();
+  }, []);
 
   // Only show published articles, sorted by date (newest first) using useMemo
   const articles = useMemo(() => {
-    return mockNewsArticles
+    return newsArticles
       .filter(article => article.status === 'published')
       .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
-  }, []);
+  }, [newsArticles]);
 
   const categories: (NewsCategory | 'all')[] = ['all', 'race-results', 'training-tips', 'team-news', 'events', 'general'];
 
@@ -45,6 +69,16 @@ const News: React.FC = () => {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="flex justify-center">
+          <LoadingSpinner size="lg" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="space-y-8">
@@ -57,6 +91,11 @@ const News: React.FC = () => {
                 <p className="text-xl md:text-2xl opacity-90">
                   Stay updated with our latest achievements and announcements
                 </p>
+                {error && (
+                  <p className="text-sm mt-2 opacity-75">
+                    {error}
+                  </p>
+                )}
               </div>
             </div>
           </div>
