@@ -1,9 +1,10 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Carousel from '../../components/ui/Carousel';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
-import { mockNewsArticles } from '../../data/mockData';
+import { newsApi } from '../../services/adminApi';
+import type { NewsArticle } from '../../types';
 
 // Import carousel images
 import image1 from '../../assets/img/carousel/image1.jpg';
@@ -15,19 +16,35 @@ import image6 from '../../assets/img/carousel/image6.jpg';
 import image7 from '../../assets/img/carousel/image7.jpg';
 
 const Home: React.FC = () => {
+  const [newsArticles, setNewsArticles] = useState<NewsArticle[]>([]);
+
+  useEffect(() => {
+    const loadNews = async () => {
+      try {
+        const articles = await newsApi.getAll();
+        setNewsArticles(articles);
+      } catch (err) {
+        console.error('Failed to load news from API:', err);
+        setNewsArticles([]);
+      }
+    };
+
+    loadNews();
+  }, []);
+
   // Get news from the last 30 days using useMemo to avoid effect warnings
   const recentNews = useMemo(() => {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-    return mockNewsArticles
+    return newsArticles
       .filter(article => 
         article.status === 'published' && 
         new Date(article.publishedAt) >= thirtyDaysAgo
       )
       .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
       .slice(0, 3); // Show only the 3 most recent
-  }, []);
+  }, [newsArticles]);
 
   const formatDate = (date: Date) => {
     return new Date(date).toLocaleDateString('en-US', {
