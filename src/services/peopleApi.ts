@@ -174,16 +174,23 @@ export const peopleApi = {
   create: async (userData: CreateUserData): Promise<UserProfile> => {
     try {
       // Transform our interface to match API expectations
+      // Backend expects nested structure with user and person data
       const apiData = {
-        first_name: userData.firstName,
-        last_name: userData.lastName,
-        phone: userData.phone,
-        image_url: userData.image, // Backend uses image_url
-        specializations: userData.specializations || [],
-        username: userData.username,
-        email: userData.email,
-        password: userData.password,
-        user_type:"coach",
+        // User fields
+        user: {
+          username: userData.username,
+          email: userData.email,
+          password: userData.password,
+          user_type: "coach",
+        },
+        // Person fields
+        person: {
+          first_name: userData.firstName,
+          last_name: userData.lastName,
+          phone: userData.phone,
+          image_url: userData.image,
+          specializations: userData.specializations || [],
+        }
       };
 
       console.log('Creating person with data:', apiData);
