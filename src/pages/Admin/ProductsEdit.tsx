@@ -134,20 +134,33 @@ const AdminProductsEdit: React.FC = () => {
           formData.append('_method', 'PUT');
         }
 
-        const response = await fetch(`${isEditing ? `${API_BASE_URL}/products/${id}` : `${API_BASE_URL}/products`}`, {
+        const url = isEditing ? `${API_BASE_URL}/products/${id}` : `${API_BASE_URL}/products`;
+        console.log('Submitting to:', url);
+        console.log('Is editing:', isEditing);
+        console.log('Has auth token:', !!localStorage.getItem('admin_token'));
+
+        const response = await fetch(url, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+            'Accept': 'application/json',
           },
           body: formData,
         });
 
+        console.log('Response status:', response.status);
+        console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
         if (!response.ok) {
+          if (response.status === 302) {
+            throw new Error('Authentication failed. Please log in again.');
+          }
           const errorData = await response.json().catch(() => ({}));
           throw new Error(`HTTP ${response.status}: ${errorData.message || response.statusText}`);
         }
 
         const result = await response.json();
+        console.log('Create/Update result:', result);
         
         // Update the current image with the new image from the response
         if (result.images && result.images.length > 0) {
