@@ -237,9 +237,10 @@ const AdminCoachesEdit: React.FC = () => {
                 <Input
                   label="Phone"
                   type="tel"
+                  formatPhone
                   {...register('phone')}
                   error={errors.phone?.message}
-                  placeholder="Enter phone number"
+                  placeholder="123-456-7890"
                 />
               </div>
             </div>
