@@ -223,9 +223,16 @@ export const peopleApi = {
       }
 
       const createdUser = await userResponse.json();
+      console.log('User creation response:', createdUser);
+      
       const userId = createdUser.id || createdUser.user_id;
       
-      console.log('User created with ID:', userId);
+      console.log('Extracted user ID:', userId);
+      
+      if (!userId) {
+        console.error('Failed to extract user_id from response:', createdUser);
+        throw new Error('User created but no user_id returned from API');
+      }
 
       // Step 2: Create the person record with the user_id and name fields
       const personPayload = {
