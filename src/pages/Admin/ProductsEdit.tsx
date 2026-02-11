@@ -9,6 +9,7 @@ import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Textarea from '../../components/ui/Textarea';
 import Select from '../../components/ui/Select';
+import ImageUploader from '../../components/ui/ImageUploader';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import StatusMessage from '../../components/ui/StatusMessage';
 
@@ -26,6 +27,7 @@ interface ProductFormData {
   brand?: string;
   rating: number;
   reviewCount: number;
+  paymentUrl?: string;
 }
 
 const AdminProductsEdit: React.FC = () => {
@@ -37,6 +39,8 @@ const AdminProductsEdit: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [currentImage, setCurrentImage] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   const {
     register,
@@ -58,6 +62,7 @@ const AdminProductsEdit: React.FC = () => {
       brand: '',
       rating: 0,
       reviewCount: 0,
+      paymentUrl: '',
     }
   });
 
@@ -80,7 +85,11 @@ const AdminProductsEdit: React.FC = () => {
         brand: product.brand || '',
         rating: product.rating,
         reviewCount: product.reviewCount,
+        paymentUrl: product.paymentUrl || '',
       });
+      
+      // Set current image (use first image if available)
+      setCurrentImage(product.images?.[0] || null);
     } catch (error) {
       console.error('Failed to load product:', error);
       setError('Failed to load product');
@@ -107,7 +116,8 @@ const AdminProductsEdit: React.FC = () => {
         price: Number(data.price),
         originalPrice: data.originalPrice ? Number(data.originalPrice) : undefined,
         category: data.category,
-        images: [],
+        images: currentImage ? [currentImage] : [],
+        imageFile: imageFile || undefined,
         inStock: data.inStock,
         stockQuantity: Number(data.stockQuantity),
         sizes: data.sizes ? data.sizes.split(',').map(s => s.trim()).filter(s => s) : undefined,
@@ -116,10 +126,20 @@ const AdminProductsEdit: React.FC = () => {
         reviewCount: Number(data.reviewCount),
         features: data.features ? data.features.split(',').map(f => f.trim()).filter(f => f) : undefined,
         brand: data.brand || undefined,
+        paymentUrl: data.paymentUrl || undefined,
       };
 
       if (isEditing && id) {
-        await productsApi.update(id, productData);
+        const updatedProduct = await productsApi.update(id, productData);
+        
+        // Update the current image with the new image from the response
+        if (updatedProduct.images && updatedProduct.images.length > 0) {
+          setCurrentImage(updatedProduct.images[0]);
+        }
+        
+        // Clear the file object since it's been uploaded
+        setImageFile(null);
+        
         setSuccess('Product updated successfully!');
       } else {
         await productsApi.create(productData);
@@ -188,6 +208,18 @@ const AdminProductsEdit: React.FC = () => {
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h3>
             
             <div className="space-y-6">
+              {/* Image Upload */}
+              <ImageUploader
+                label="Product Image"
+                currentImage={currentImage ?? undefined}
+                onImageChange={(url, file) => {
+                  setCurrentImage(url);
+                  setImageFile(file || null);
+                }}
+                helperText="Upload a product image (max 5MB)"
+                maxSize={5}
+              />
+              
               <Input
                 label="Product Name"
                 {...register('name', { required: 'Product name is required' })}
@@ -315,32 +347,43 @@ const AdminProductsEdit: React.FC = () => {
             </div>
           </Card>
 
-          {/* Rating */}
+          {/* Rating & Payment */}
           <Card>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Rating & Reviews</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Rating & Payment</h3>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Input
-                label="Rating"
-                type="number"
-                step="0.1"
-                {...register('rating', {
-                  min: { value: 0, message: 'Rating must be between 0 and 5' },
-                  max: { value: 5, message: 'Rating must be between 0 and 5' }
-                })}
-                error={errors.rating?.message}
-                placeholder="0.0"
-                helperText="Rating out of 5"
-              />
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Input
+                  label="Rating"
+                  type="number"
+                  step="0.1"
+                  {...register('rating', {
+                    min: { value: 0, message: 'Rating must be between 0 and 5' },
+                    max: { value: 5, message: 'Rating must be between 0 and 5' }
+                  })}
+                  error={errors.rating?.message}
+                  placeholder="0.0"
+                  helperText="Rating out of 5"
+                />
 
+                <Input
+                  label="Review Count"
+                  type="number"
+                  {...register('reviewCount', {
+                    min: { value: 0, message: 'Review count must be positive' }
+                  })}
+                  error={errors.reviewCount?.message}
+                  placeholder="0"
+                />
+              </div>
+              
               <Input
-                label="Review Count"
-                type="number"
-                {...register('reviewCount', {
-                  min: { value: 0, message: 'Review count must be positive' }
-                })}
-                error={errors.reviewCount?.message}
-                placeholder="0"
+                label="Payment URL"
+                type="url"
+                {...register('paymentUrl')}
+                error={errors.paymentUrl?.message}
+                placeholder="https://square.com/payment-link"
+                helperText="External payment link (e.g., Square, PayPal)"
               />
             </div>
           </Card>
