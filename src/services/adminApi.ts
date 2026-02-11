@@ -1,4 +1,4 @@
-import type { Coach, Event, Product, VelocityClass, NewsArticle } from '../types';
+import type { Coach, Event, Product, ProductCategory, VelocityClass, NewsArticle } from '../types';
 import { API_BASE_URL } from '../config/api';
 
 // Coaches API
@@ -275,36 +275,211 @@ export const eventsApi = {
 // Products API
 export const productsApi = {
   getAll: async (): Promise<Product[]> => {
-    const { mockProducts } = await import('../data/mockData');
-    return mockProducts;
+    try {
+      const response = await fetch(`${API_BASE_URL}/products`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      // Transform API response to match our Product interface
+      return data.map((item: Record<string, unknown>) => ({
+        id: String(item.id),
+        name: String(item.name || ''),
+        description: String(item.description || ''),
+        price: Number(item.price || 0),
+        originalPrice: item.original_price ? Number(item.original_price) : undefined,
+        category: String(item.category || 'gear') as ProductCategory,
+        images: Array.isArray(item.images) ? item.images : [],
+        inStock: Boolean(item.in_stock),
+        stockQuantity: Number(item.stock_quantity || 0),
+        sizes: Array.isArray(item.sizes) ? item.sizes : undefined,
+        colors: Array.isArray(item.colors) ? item.colors : undefined,
+        rating: Number(item.rating || 0),
+        reviewCount: Number(item.review_count || 0),
+        features: Array.isArray(item.features) ? item.features : undefined,
+        brand: item.brand ? String(item.brand) : undefined,
+      }));
+    } catch (error) {
+      console.error('Failed to fetch products from API:', error);
+      return [];
+    }
   },
 
   getById: async (id: string): Promise<Product> => {
-    const { mockProducts } = await import('../data/mockData');
-    const product = mockProducts.find(p => p.id === id);
-    if (!product) throw new Error('Product not found');
-    return product;
+    try {
+      const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const item: Record<string, unknown> = await response.json();
+      
+      return {
+        id: String(item.id),
+        name: String(item.name || ''),
+        description: String(item.description || ''),
+        price: Number(item.price || 0),
+        originalPrice: item.original_price ? Number(item.original_price) : undefined,
+        category: String(item.category || 'gear') as ProductCategory,
+        images: Array.isArray(item.images) ? item.images : [],
+        inStock: Boolean(item.in_stock),
+        stockQuantity: Number(item.stock_quantity || 0),
+        sizes: Array.isArray(item.sizes) ? item.sizes : undefined,
+        colors: Array.isArray(item.colors) ? item.colors : undefined,
+        rating: Number(item.rating || 0),
+        reviewCount: Number(item.review_count || 0),
+        features: Array.isArray(item.features) ? item.features : undefined,
+        brand: item.brand ? String(item.brand) : undefined,
+      };
+    } catch (error) {
+      console.error('Failed to fetch product from API:', error);
+      throw new Error('Product not found');
+    }
   },
 
   create: async (product: Omit<Product, 'id'>): Promise<Product> => {
-    const newProduct: Product = {
-      ...product,
-      id: Date.now().toString(),
-    };
-    console.log('Creating product:', newProduct);
-    return newProduct;
+    try {
+      const response = await fetch(`${API_BASE_URL}/products`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+        },
+        body: JSON.stringify({
+          name: product.name,
+          description: product.description,
+          price: product.price,
+          original_price: product.originalPrice,
+          category: product.category,
+          images: product.images,
+          in_stock: product.inStock,
+          stock_quantity: product.stockQuantity,
+          sizes: product.sizes,
+          colors: product.colors,
+          rating: product.rating,
+          review_count: product.reviewCount,
+          features: product.features,
+          brand: product.brand,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`HTTP ${response.status}: ${errorData.message || response.statusText}`);
+      }
+
+      const item: Record<string, unknown> = await response.json();
+      
+      return {
+        id: String(item.id),
+        name: String(item.name || ''),
+        description: String(item.description || ''),
+        price: Number(item.price || 0),
+        originalPrice: item.original_price ? Number(item.original_price) : undefined,
+        category: String(item.category || 'gear') as ProductCategory,
+        images: Array.isArray(item.images) ? item.images : [],
+        inStock: Boolean(item.in_stock),
+        stockQuantity: Number(item.stock_quantity || 0),
+        sizes: Array.isArray(item.sizes) ? item.sizes : undefined,
+        colors: Array.isArray(item.colors) ? item.colors : undefined,
+        rating: Number(item.rating || 0),
+        reviewCount: Number(item.review_count || 0),
+        features: Array.isArray(item.features) ? item.features : undefined,
+        brand: item.brand ? String(item.brand) : undefined,
+      };
+    } catch (error) {
+      console.error('Failed to create product via API:', error);
+      throw error;
+    }
   },
 
   update: async (id: string, product: Partial<Product>): Promise<Product> => {
-    console.log('Updating product:', id, product);
-    const { mockProducts } = await import('../data/mockData');
-    const existingProduct = mockProducts.find(p => p.id === id);
-    if (!existingProduct) throw new Error('Product not found');
-    return { ...existingProduct, ...product };
+    try {
+      const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+        },
+        body: JSON.stringify({
+          name: product.name,
+          description: product.description,
+          price: product.price,
+          original_price: product.originalPrice,
+          category: product.category,
+          images: product.images,
+          in_stock: product.inStock,
+          stock_quantity: product.stockQuantity,
+          sizes: product.sizes,
+          colors: product.colors,
+          rating: product.rating,
+          review_count: product.reviewCount,
+          features: product.features,
+          brand: product.brand,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`HTTP ${response.status}: ${errorData.message || response.statusText}`);
+      }
+
+      const item: Record<string, unknown> = await response.json();
+      
+      return {
+        id: String(item.id),
+        name: String(item.name || ''),
+        description: String(item.description || ''),
+        price: Number(item.price || 0),
+        originalPrice: item.original_price ? Number(item.original_price) : undefined,
+        category: String(item.category || 'gear') as ProductCategory,
+        images: Array.isArray(item.images) ? item.images : [],
+        inStock: Boolean(item.in_stock),
+        stockQuantity: Number(item.stock_quantity || 0),
+        sizes: Array.isArray(item.sizes) ? item.sizes : undefined,
+        colors: Array.isArray(item.colors) ? item.colors : undefined,
+        rating: Number(item.rating || 0),
+        reviewCount: Number(item.review_count || 0),
+        features: Array.isArray(item.features) ? item.features : undefined,
+        brand: item.brand ? String(item.brand) : undefined,
+      };
+    } catch (error) {
+      console.error('Failed to update product via API:', error);
+      throw error;
+    }
   },
 
   delete: async (id: string): Promise<void> => {
-    console.log('Deleting product:', id);
+    try {
+      const response = await fetch(`${API_BASE_URL}/products/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(`HTTP ${response.status}: ${errorData.message || response.statusText}`);
+      }
+    } catch (error) {
+      console.error('Failed to delete product via API:', error);
+      throw error;
+    }
   },
 };
 

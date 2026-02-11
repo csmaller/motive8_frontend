@@ -1,16 +1,44 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
-import { mockProducts, getProductsByCategory, getFeaturedProducts } from '../../data/mockData';
+import LoadingSpinner from '../../components/ui/LoadingSpinner';
+import { productsApi } from '../../services/adminApi';
 import type { Product, ProductCategory } from '../../types';
 import { PRODUCT_CATEGORIES } from '../../types';
 
 const Store: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<ProductCategory | 'all'>('all');
   const [sortBy, setSortBy] = useState<'name' | 'price' | 'rating'>('name');
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        setIsLoading(true);
+        const data = await productsApi.getAll();
+        setProducts(data);
+      } catch (error) {
+        console.error('Failed to load products:', error);
+        setProducts([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadProducts();
+  }, []);
   
+  const getProductsByCategory = (category: ProductCategory): Product[] => {
+    return products.filter(p => p.category === category);
+  };
+
+  const getFeaturedProducts = (): Product[] => {
+    return products.filter(p => p.rating >= 4.5).slice(0, 4);
+  };
+
   const filteredProducts = selectedCategory === 'all' 
-    ? mockProducts 
+    ? products 
     : getProductsByCategory(selectedCategory);
 
   const sortedProducts = [...filteredProducts].sort((a, b) => {
@@ -24,8 +52,6 @@ const Store: React.FC = () => {
         return a.name.localeCompare(b.name);
     }
   });
-
-  const featuredProducts = getFeaturedProducts();
 
   const getCategoryColor = (category: ProductCategory) => {
     switch (category) {
@@ -209,6 +235,16 @@ const Store: React.FC = () => {
     </Card>
   );
 
+  if (isLoading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div className="flex justify-center">
+          <LoadingSpinner size="lg" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="space-y-12">
@@ -232,14 +268,16 @@ const Store: React.FC = () => {
         </section>
 
         {/* Featured Products */}
-        <section>
-          <h2 className="text-3xl font-bold text-gray-900 text-center mb-8">Featured Products</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-            {featuredProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-        </section>
+        {getFeaturedProducts().length > 0 && (
+          <section>
+            <h2 className="text-3xl font-bold text-gray-900 text-center mb-8">Featured Products</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+              {getFeaturedProducts().map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Filters and Sorting */}
         <section>
@@ -251,7 +289,7 @@ const Store: React.FC = () => {
                 onClick={() => setSelectedCategory('all')}
                 size="sm"
               >
-                All Products ({mockProducts.length})
+                All Products ({products.length})
               </Button>
               {PRODUCT_CATEGORIES.map((category) => (
                 <Button
