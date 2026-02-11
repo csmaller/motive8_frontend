@@ -23,6 +23,14 @@ interface ApiPersonResponse {
   image_url?: string;
   specialization?: string; // Backend uses singular
   specializations?: string[];
+  user?: {
+    id?: number;
+    email?: string;
+    user_type_id?: number;
+    created_at?: string;
+    updated_at?: string;
+    deleted_at?: string | null;
+  };
 }
 
 // Export types for use in other files
@@ -153,13 +161,17 @@ export const peopleApi = {
 
       const item: ApiPersonResponse = await response.json();
       
+      // Extract email from nested user object if present
+      const email = item.user?.email || item.email || '';
+      const userId = item.user?.id || item.user_id || item.id || '';
+      
       // Transform the API response to match our interface
       return {
-        id: item.id || item.user_id || '',
+        id: String(userId),
         personId: item.person_id || item.id || '',
-        username: item.username || '',
-        email: item.email || '',
-        user_type:item.user_type ||"",
+        username: item.username || email.split('@')[0] || '',
+        email: email,
+        user_type: item.user_type || "",
         createdAt: new Date(item.created_at || item.createdAt || Date.now()),
         updatedAt: new Date(item.updated_at || item.updatedAt || Date.now()),
         lastLogin: item.last_login ? new Date(item.last_login) : undefined,
@@ -167,7 +179,7 @@ export const peopleApi = {
           id: item.person_id || item.id || '',
           firstName: item.first_name || item.firstName || '',
           lastName: item.last_name || item.lastName || '',
-          phone: item.phone,
+          phone: item.phone || undefined,
           image: item.image_url || item.image,
           specializations: parseSpecializations(item),
           createdAt: new Date(item.created_at || item.createdAt || Date.now()),
