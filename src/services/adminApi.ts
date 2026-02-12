@@ -60,22 +60,25 @@ export const eventsApi = {
       const data = await response.json();
       
       // Transform API response to match our interface
-      return data.map((item: Record<string, unknown>) => ({
-        id: item.id || item.event_id,
-        title: item.title,
-        description: item.description,
-        date: new Date(item.date as string),
-        time: item.time,
-        location: item.location,
-        type: item.type,
-        cost: item.cost,
-        registrationRequired: item.registration_required ?? item.registrationRequired,
-        maxParticipants: item.max_participants ?? item.maxParticipants,
-        currentParticipants: item.current_participants ?? item.currentParticipants,
-        registrationDeadline: item.registration_deadline ? new Date(item.registration_deadline as string) : undefined,
-        imageUrl: item.image_url ?? item.imageUrl,
-        paymentUrl: item.payment_url ?? item.paymentUrl,
-      }));
+      return data.map((item: Record<string, unknown>) => {
+        const imageUrl = item.image_url ?? item.imageUrl;
+        return {
+          id: item.id || item.event_id,
+          title: item.title,
+          description: item.description,
+          date: new Date(item.date as string),
+          time: item.time,
+          location: item.location,
+          type: item.type,
+          cost: item.cost,
+          registrationRequired: item.registration_required ?? item.registrationRequired,
+          maxParticipants: item.max_participants ?? item.maxParticipants,
+          currentParticipants: item.current_participants ?? item.currentParticipants,
+          registrationDeadline: item.registration_deadline ? new Date(item.registration_deadline as string) : undefined,
+          imageUrl: imageUrl && typeof imageUrl === 'string' && imageUrl.startsWith('/') ? `${API_BASE_URL}${imageUrl}` : imageUrl,
+          paymentUrl: item.payment_url ?? item.paymentUrl,
+        };
+      });
     } catch (error) {
       console.error('Failed to fetch events from API:', error);
       console.log('Falling back to mock data...');
@@ -100,6 +103,7 @@ export const eventsApi = {
 
       const item = await response.json();
       
+      const imageUrl = item.image_url ?? item.imageUrl;
       return {
         id: item.id || item.event_id,
         title: item.title,
@@ -113,7 +117,7 @@ export const eventsApi = {
         maxParticipants: item.max_participants ?? item.maxParticipants,
         currentParticipants: item.current_participants ?? item.currentParticipants,
         registrationDeadline: item.registration_deadline ? new Date(item.registration_deadline) : undefined,
-        imageUrl: item.image_url ?? item.imageUrl,
+        imageUrl: imageUrl && typeof imageUrl === 'string' && imageUrl.startsWith('/') ? `${API_BASE_URL}${imageUrl}` : imageUrl,
         paymentUrl: item.payment_url ?? item.paymentUrl,
       };
     } catch (error) {
@@ -161,6 +165,7 @@ export const eventsApi = {
 
       const item = await response.json();
       
+      const imageUrl = item.image_url ?? item.imageUrl;
       return {
         id: item.id || item.event_id,
         title: item.title,
@@ -174,7 +179,7 @@ export const eventsApi = {
         maxParticipants: item.max_participants ?? item.maxParticipants,
         currentParticipants: item.current_participants ?? item.currentParticipants,
         registrationDeadline: item.registration_deadline ? new Date(item.registration_deadline) : undefined,
-        imageUrl: item.image_url ?? item.imageUrl,
+        imageUrl: imageUrl && typeof imageUrl === 'string' && imageUrl.startsWith('/') ? `${API_BASE_URL}${imageUrl}` : imageUrl,
         paymentUrl: item.payment_url ?? item.paymentUrl,
       };
     } catch (error) {
@@ -227,6 +232,7 @@ export const eventsApi = {
 
       const item = await response.json();
       
+      const imageUrl = item.image_url ?? item.imageUrl;
       return {
         id: item.id || item.event_id,
         title: item.title,
@@ -240,7 +246,7 @@ export const eventsApi = {
         maxParticipants: item.max_participants ?? item.maxParticipants,
         currentParticipants: item.current_participants ?? item.currentParticipants,
         registrationDeadline: item.registration_deadline ? new Date(item.registration_deadline) : undefined,
-        imageUrl: item.image_url ?? item.imageUrl,
+        imageUrl: imageUrl && typeof imageUrl === 'string' && imageUrl.startsWith('/') ? `${API_BASE_URL}${imageUrl}` : imageUrl,
         paymentUrl: item.payment_url ?? item.paymentUrl,
       };
     } catch (error) {
