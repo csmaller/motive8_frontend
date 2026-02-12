@@ -121,6 +121,17 @@ const Events: React.FC = () => {
     return (
       <Card hover={true} className="h-full">
         <div className="flex flex-col h-full">
+          {/* Event Image - 16:9 ratio */}
+          {event.imageUrl && (
+            <div className="w-full aspect-video mb-4 rounded-lg overflow-hidden bg-gray-200">
+              <img 
+                src={event.imageUrl} 
+                alt={event.title}
+                className="w-full h-full object-cover"
+              />
+            </div>
+          )}
+
           {/* Event Type Badge */}
           <div className="flex items-center justify-between mb-4">
             <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getEventTypeColor(event.type)}`}>
@@ -225,7 +236,7 @@ const Events: React.FC = () => {
         <h3 className="text-2xl font-bold text-gray-900 border-b-2 border-primary-200 pb-2">
           {month}
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="space-y-6">
           {events.map((event) => (
             <EventCard key={event.id} event={event} />
           ))}
@@ -254,7 +265,7 @@ const Events: React.FC = () => {
             </span>
             <span className="text-gray-500">({events.length} events)</span>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="space-y-6">
             {events.map((event) => (
               <EventCard key={event.id} event={event} />
             ))}

@@ -2,12 +2,14 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { eventsApi } from '../../services/adminApi';
+import { API_BASE_URL } from '../../config/api';
 import type { Event } from '../../types';
 import Card from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import Textarea from '../../components/ui/Textarea';
 import Select from '../../components/ui/Select';
+import ImageUploader from '../../components/ui/ImageUploader';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import StatusMessage from '../../components/ui/StatusMessage';
 
@@ -33,6 +35,8 @@ const AdminEventsEdit: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [currentImage, setCurrentImage] = useState<string | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
 
   const {
     register,
@@ -81,6 +85,9 @@ const AdminEventsEdit: React.FC = () => {
         registrationDeadline: formattedDeadline,
         cost: event.cost || 0
       });
+      
+      // Set current image if available
+      setCurrentImage(event.imageUrl || null);
     } catch (error) {
       console.error('Failed to load event:', error);
       setError('Failed to load event');
@@ -101,22 +108,73 @@ const AdminEventsEdit: React.FC = () => {
       setError('');
       setSuccess('');
       
-      const eventData = {
-        ...data,
-        date: new Date(data.date),
-        registrationDeadline: data.registrationDeadline ? new Date(data.registrationDeadline) : undefined,
-        currentParticipants: 0 // Default for new events
-      };
+      // Use FormData if there's an image file to upload
+      if (imageFile) {
+        const formData = new FormData();
+        formData.append('title', data.title);
+        formData.append('date', data.date);
+        formData.append('time', data.time);
+        formData.append('location', data.location);
+        formData.append('description', data.description);
+        formData.append('type', data.type);
+        formData.append('registration_required', String(data.registrationRequired));
+        formData.append('max_participants', String(data.maxParticipants));
+        if (data.registrationDeadline) formData.append('registration_deadline', data.registrationDeadline);
+        formData.append('cost', String(data.cost));
+        formData.append('current_participants', '0');
+        formData.append('image', imageFile);
+        
+        if (isEditing) {
+          formData.append('_method', 'PUT');
+        }
 
-      if (isEditing && id) {
-        await eventsApi.update(id, eventData);
-        setSuccess('Event updated successfully!');
-        setTimeout(() => navigate('/admin/events'), 1500);
+        const url = isEditing ? `${API_BASE_URL}/events/${id}` : `${API_BASE_URL}/events`;
+        
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`,
+            'Accept': 'application/json',
+          },
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(`HTTP ${response.status}: ${errorData.message || response.statusText}`);
+        }
+
+        const result = await response.json();
+        
+        // Update the current image with the new image from the response
+        if (result.image_url) {
+          setCurrentImage(result.image_url);
+        }
+        
+        // Clear the file object since it's been uploaded
+        setImageFile(null);
+        
+        setSuccess(isEditing ? 'Event updated successfully!' : 'Event created successfully!');
       } else {
-        await eventsApi.create(eventData);
-        setSuccess('Event created successfully!');
-        setTimeout(() => navigate('/admin/events'), 1500);
+        // No image file, use JSON
+        const eventData = {
+          ...data,
+          date: new Date(data.date),
+          registrationDeadline: data.registrationDeadline ? new Date(data.registrationDeadline) : undefined,
+          currentParticipants: 0,
+          imageUrl: currentImage || undefined
+        };
+
+        if (isEditing && id) {
+          await eventsApi.update(id, eventData);
+          setSuccess('Event updated successfully!');
+        } else {
+          await eventsApi.create(eventData);
+          setSuccess('Event created successfully!');
+        }
       }
+      
+      setTimeout(() => navigate('/admin/events'), 1500);
     } catch (error) {
       console.error('Failed to save event:', error);
       setError(error instanceof Error ? error.message : 'Failed to save event. Please try again.');
@@ -182,16 +240,28 @@ const AdminEventsEdit: React.FC = () => {
           <Card>
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Event Details</h3>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="md:col-span-2">
-                <Input
-                  label="Event Title"
-                  {...register('title', { required: 'Title is required' })}
-                  error={errors.title?.message}
-                  placeholder="Enter event title"
-                />
-              </div>
+            <div className="space-y-6">
+              {/* Image Upload */}
+              <ImageUploader
+                label="Event Image"
+                currentImage={currentImage ?? undefined}
+                onImageChange={(url, file) => {
+                  setCurrentImage(url);
+                  setImageFile(file || null);
+                }}
+                helperText="Upload an event image (max 5MB). Best results with 16:9 aspect ratio (e.g., 1920x1080)"
+                maxSize={5}
+              />
               
+              <Input
+                label="Event Title"
+                {...register('title', { required: 'Title is required' })}
+                error={errors.title?.message}
+                placeholder="Enter event title"
+              />
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
               <Input
                 label="Date"
                 type="date"
