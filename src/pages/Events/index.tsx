@@ -4,6 +4,7 @@ import Button from '../../components/ui/Button';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import { eventsApi } from '../../services/adminApi';
 import type { Event, EventType } from '../../types';
+import defaultEventImage from '../../assets/img/carousel/image3.jpg';
 
 const Events: React.FC = () => {
   const [selectedType, setSelectedType] = useState<EventType | 'all'>('all');
@@ -122,15 +123,13 @@ const Events: React.FC = () => {
       <Card hover={true} className="h-full">
         <div className="flex flex-col h-full">
           {/* Event Image - 16:9 ratio */}
-          {event.imageUrl && (
-            <div className="w-full aspect-video mb-4 rounded-lg overflow-hidden bg-gray-200">
-              <img 
-                src={event.imageUrl} 
-                alt={event.title}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          )}
+          <div className="w-full aspect-video mb-4 rounded-lg overflow-hidden bg-gray-200">
+            <img 
+              src={event.imageUrl || defaultEventImage} 
+              alt={event.title}
+              className="w-full h-full object-cover"
+            />
+          </div>
 
           {/* Event Type Badge */}
           <div className="flex items-center justify-between mb-4">
