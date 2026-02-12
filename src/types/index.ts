@@ -47,6 +47,7 @@ export interface Event {
   registrationDeadline?: Date;
   cost?: number;
   imageUrl?: string;
+  paymentUrl?: string;
 }
 
 export interface VelocityClass {

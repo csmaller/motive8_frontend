@@ -24,6 +24,7 @@ interface EventFormData {
   maxParticipants: number;
   registrationDeadline: string;
   cost: number;
+  paymentUrl: string;
 }
 
 const AdminEventsEdit: React.FC = () => {
@@ -55,7 +56,8 @@ const AdminEventsEdit: React.FC = () => {
       registrationRequired: false,
       maxParticipants: 20,
       registrationDeadline: '',
-      cost: 0
+      cost: 0,
+      paymentUrl: ''
     }
   });
 
@@ -83,7 +85,8 @@ const AdminEventsEdit: React.FC = () => {
         registrationRequired: event.registrationRequired,
         maxParticipants: event.maxParticipants,
         registrationDeadline: formattedDeadline,
-        cost: event.cost || 0
+        cost: event.cost || 0,
+        paymentUrl: event.paymentUrl || ''
       });
       
       // Set current image if available
@@ -121,6 +124,7 @@ const AdminEventsEdit: React.FC = () => {
         formData.append('max_participants', String(data.maxParticipants));
         if (data.registrationDeadline) formData.append('registration_deadline', data.registrationDeadline);
         formData.append('cost', String(data.cost));
+        if (data.paymentUrl) formData.append('payment_url', data.paymentUrl);
         formData.append('current_participants', '0');
         formData.append('image', imageFile);
         
@@ -162,7 +166,8 @@ const AdminEventsEdit: React.FC = () => {
           date: new Date(data.date),
           registrationDeadline: data.registrationDeadline ? new Date(data.registrationDeadline) : undefined,
           currentParticipants: 0,
-          imageUrl: currentImage || undefined
+          imageUrl: currentImage || undefined,
+          paymentUrl: data.paymentUrl || undefined
         };
 
         if (isEditing && id) {
@@ -320,6 +325,15 @@ const AdminEventsEdit: React.FC = () => {
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Registration Settings</h3>
             
             <div className="space-y-6">
+              <Input
+                label="Payment/Registration URL"
+                type="url"
+                {...register('paymentUrl')}
+                error={errors.paymentUrl?.message}
+                placeholder="https://example.com/register"
+                helperText="External link for event registration or payment (optional)"
+              />
+              
               <div>
                 <label className="flex items-center space-x-2">
                   <input

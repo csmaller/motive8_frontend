@@ -209,6 +209,11 @@ const Events: React.FC = () => {
                 size="sm"
                 className="w-full"
                 disabled={isFull || isPastDeadline}
+                onClick={() => {
+                  if (event.paymentUrl && !isFull && !isPastDeadline) {
+                    window.open(event.paymentUrl, '_blank', 'noopener,noreferrer');
+                  }
+                }}
               >
                 {isFull ? 'Event Full' : isPastDeadline ? 'Registration Closed' : 'Register Now'}
               </Button>

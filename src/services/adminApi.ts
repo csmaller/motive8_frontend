@@ -74,6 +74,7 @@ export const eventsApi = {
         currentParticipants: item.current_participants ?? item.currentParticipants,
         registrationDeadline: item.registration_deadline ? new Date(item.registration_deadline as string) : undefined,
         imageUrl: item.image_url ?? item.imageUrl,
+        paymentUrl: item.payment_url ?? item.paymentUrl,
       }));
     } catch (error) {
       console.error('Failed to fetch events from API:', error);
@@ -113,6 +114,7 @@ export const eventsApi = {
         currentParticipants: item.current_participants ?? item.currentParticipants,
         registrationDeadline: item.registration_deadline ? new Date(item.registration_deadline) : undefined,
         imageUrl: item.image_url ?? item.imageUrl,
+        paymentUrl: item.payment_url ?? item.paymentUrl,
       };
     } catch (error) {
       console.error('Failed to fetch event from API:', error);
@@ -140,6 +142,7 @@ export const eventsApi = {
         current_participants: event.currentParticipants || 0,
         registration_deadline: event.registrationDeadline instanceof Date ? event.registrationDeadline.toISOString().split('T')[0] : event.registrationDeadline,
         image_url: event.imageUrl,
+        payment_url: event.paymentUrl,
       };
 
       const response = await fetch(`${API_BASE_URL}/events`, {
@@ -172,6 +175,7 @@ export const eventsApi = {
         currentParticipants: item.current_participants ?? item.currentParticipants,
         registrationDeadline: item.registration_deadline ? new Date(item.registration_deadline) : undefined,
         imageUrl: item.image_url ?? item.imageUrl,
+        paymentUrl: item.payment_url ?? item.paymentUrl,
       };
     } catch (error) {
       console.error('Failed to create event via API:', error);
@@ -205,6 +209,7 @@ export const eventsApi = {
         apiData.registration_deadline = event.registrationDeadline instanceof Date ? event.registrationDeadline.toISOString().split('T')[0] : event.registrationDeadline;
       }
       if (event.imageUrl !== undefined) apiData.image_url = event.imageUrl;
+      if (event.paymentUrl !== undefined) apiData.payment_url = event.paymentUrl;
 
       const response = await fetch(`${API_BASE_URL}/events/${id}`, {
         method: 'PUT',
@@ -236,6 +241,7 @@ export const eventsApi = {
         currentParticipants: item.current_participants ?? item.currentParticipants,
         registrationDeadline: item.registration_deadline ? new Date(item.registration_deadline) : undefined,
         imageUrl: item.image_url ?? item.imageUrl,
+        paymentUrl: item.payment_url ?? item.paymentUrl,
       };
     } catch (error) {
       console.error('Failed to update event via API:', error);
