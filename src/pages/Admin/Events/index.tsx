@@ -150,7 +150,18 @@ const AdminEvents: React.FC = () => {
             
             return (
               <Card key={event.id} className="hover:shadow-md transition-shadow">
-                <div className="flex items-start justify-between">
+                <div className="flex items-start justify-between gap-4">
+                  {/* Event Image Thumbnail */}
+                  {event.imageUrl && (
+                    <div className="flex-shrink-0">
+                      <img 
+                        src={event.imageUrl} 
+                        alt={event.title}
+                        className="w-32 h-20 object-cover rounded-lg"
+                      />
+                    </div>
+                  )}
+                  
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center space-x-3 mb-2">
                       <h3 className="text-lg font-semibold text-gray-900 truncate">
@@ -194,7 +205,7 @@ const AdminEvents: React.FC = () => {
                     </div>
                   </div>
                   
-                  <div className="flex flex-col space-y-2 ml-4">
+                  <div className="flex flex-col space-y-2 ml-4 flex-shrink-0">
                     <div className="flex space-x-2">
                       <Link to={`/admin/events/${event.id}/edit`}>
                         <Button variant="outline" size="sm">
