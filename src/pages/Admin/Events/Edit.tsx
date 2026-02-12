@@ -325,15 +325,6 @@ const AdminEventsEdit: React.FC = () => {
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Registration Settings</h3>
             
             <div className="space-y-6">
-              <Input
-                label="Payment/Registration URL"
-                type="url"
-                {...register('paymentUrl')}
-                error={errors.paymentUrl?.message}
-                placeholder="https://example.com/register"
-                helperText="External link for event registration or payment (optional)"
-              />
-              
               <div>
                 <label className="flex items-center space-x-2">
                   <input
@@ -347,26 +338,37 @@ const AdminEventsEdit: React.FC = () => {
               </div>
               
               {watchRegistrationRequired && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <Input
-                    label="Maximum Participants"
-                    type="number"
-                    {...register('maxParticipants', { 
-                      required: watchRegistrationRequired ? 'Maximum participants is required' : false,
-                      min: { value: 1, message: 'Must allow at least 1 participant' }
-                    })}
-                    error={errors.maxParticipants?.message}
-                    placeholder="20"
-                  />
+                <div className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <Input
+                      label="Maximum Participants"
+                      type="number"
+                      {...register('maxParticipants', { 
+                        required: watchRegistrationRequired ? 'Maximum participants is required' : false,
+                        min: { value: 1, message: 'Must allow at least 1 participant' }
+                      })}
+                      error={errors.maxParticipants?.message}
+                      placeholder="20"
+                    />
+                    
+                    <Input
+                      label="Registration Deadline"
+                      type="date"
+                      {...register('registrationDeadline', {
+                        required: watchRegistrationRequired ? 'Registration deadline is required' : false
+                      })}
+                      error={errors.registrationDeadline?.message}
+                      helperText="Last day to register"
+                    />
+                  </div>
                   
                   <Input
-                    label="Registration Deadline"
-                    type="date"
-                    {...register('registrationDeadline', {
-                      required: watchRegistrationRequired ? 'Registration deadline is required' : false
-                    })}
-                    error={errors.registrationDeadline?.message}
-                    helperText="Last day to register"
+                    label="Payment/Registration URL"
+                    type="url"
+                    {...register('paymentUrl')}
+                    error={errors.paymentUrl?.message}
+                    placeholder="https://example.com/register"
+                    helperText="External link for event registration or payment"
                   />
                 </div>
               )}
