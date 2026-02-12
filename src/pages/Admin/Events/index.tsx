@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { eventsApi } from '../../services/adminApi';
-import type { Event } from '../../types';
-import Card from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
-import LoadingSpinner from '../../components/ui/LoadingSpinner';
-import StatusMessage from '../../components/ui/StatusMessage';
+import { eventsApi } from '../../../services/adminApi';
+import type { Event } from '../../../types';
+import Card from '../../../components/ui/Card';
+import Button from '../../../components/ui/Button';
+import LoadingSpinner from '../../../components/ui/LoadingSpinner';
+import StatusMessage from '../../../components/ui/StatusMessage';
 
 const AdminEvents: React.FC = () => {
   const [events, setEvents] = useState<Event[]>([]);

@@ -15,17 +15,17 @@ import NotFound from './pages/NotFound';
 import AdminLogin from './pages/Admin/Login';
 import AdminDashboard from './pages/Admin/Dashboard';
 import AdminCoaches from './pages/Admin/Coaches';
-import AdminCoachesEdit from './pages/Admin/CoachesEdit.tsx';
+import AdminCoachesEdit from './pages/Admin/Coaches/Edit';
 import AdminEvents from './pages/Admin/Events';
-import AdminEventsEdit from './pages/Admin/EventsEdit';
+import AdminEventsEdit from './pages/Admin/Events/Edit';
 import AdminNews from './pages/Admin/News';
-import AdminNewsEdit from './pages/Admin/NewsEdit';
+import AdminNewsEdit from './pages/Admin/News/Edit';
 import AdminUsers from './pages/Admin/Users';
-import AdminUsersEdit from './pages/Admin/UsersEdit';
+import AdminUsersEdit from './pages/Admin/Users/Edit';
 import AdminProducts from './pages/Admin/Products';
-import AdminProductsEdit from './pages/Admin/ProductsEdit';
+import AdminProductsEdit from './pages/Admin/Products/Edit';
 import AdminVelocityClasses from './pages/Admin/VelocityClasses';
-import AdminVelocityClassesEdit from './pages/Admin/VelocityClassesEdit';
+import AdminVelocityClassesEdit from './pages/Admin/VelocityClasses/Edit';
 
 function App() {
   return (

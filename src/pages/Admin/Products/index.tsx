@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { productsApi } from '../../services/adminApi';
-import type { Product } from '../../types';
-import Card from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
-import LoadingSpinner from '../../components/ui/LoadingSpinner';
-import StatusMessage from '../../components/ui/StatusMessage';
+import { productsApi } from '../../../services/adminApi';
+import type { Product } from '../../../types';
+import Card from '../../../components/ui/Card';
+import Button from '../../../components/ui/Button';
+import LoadingSpinner from '../../../components/ui/LoadingSpinner';
+import StatusMessage from '../../../components/ui/StatusMessage';
 
 const AdminProducts: React.FC = () => {
   const navigate = useNavigate();

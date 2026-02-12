@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { newsApi } from '../../services/adminApi';
-import type { NewsArticle, NewsCategory, NewsStatus } from '../../types';
-import Card from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
-import LoadingSpinner from '../../components/ui/LoadingSpinner';
-import StatusMessage from '../../components/ui/StatusMessage';
+import { newsApi } from '../../../services/adminApi';
+import type { NewsArticle, NewsCategory, NewsStatus } from '../../../types';
+import Card from '../../../components/ui/Card';
+import Button from '../../../components/ui/Button';
+import LoadingSpinner from '../../../components/ui/LoadingSpinner';
+import StatusMessage from '../../../components/ui/StatusMessage';
 
 const AdminNews: React.FC = () => {
   const [articles, setArticles] = useState<NewsArticle[]>([]);

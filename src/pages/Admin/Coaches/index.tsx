@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { peopleApi } from '../../services/peopleApi';
-import type { UserProfile } from '../../types';
-import Card from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
-import LoadingSpinner from '../../components/ui/LoadingSpinner';
-import StatusMessage from '../../components/ui/StatusMessage';
-import markHeadshot from '../../assets/img/dummy/mark_headshot.png';
+import { peopleApi } from '../../../services/peopleApi';
+import type { UserProfile } from '../../../types';
+import Card from '../../../components/ui/Card';
+import Button from '../../../components/ui/Button';
+import LoadingSpinner from '../../../components/ui/LoadingSpinner';
+import StatusMessage from '../../../components/ui/StatusMessage';
+import markHeadshot from '../../../assets/img/dummy/mark_headshot.png';
 
 const AdminCoaches: React.FC = () => {
   const [coaches, setCoaches] = useState<UserProfile[]>([]);

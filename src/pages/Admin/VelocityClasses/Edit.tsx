@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { velocityClassesApi } from '../../services/adminApi';
-import Card from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
-import Input from '../../components/ui/Input';
-import Textarea from '../../components/ui/Textarea';
-import Select from '../../components/ui/Select';
-import LoadingSpinner from '../../components/ui/LoadingSpinner';
-import StatusMessage from '../../components/ui/StatusMessage';
+import { velocityClassesApi } from '../../../services/adminApi';
+import Card from '../../../components/ui/Card';
+import Button from '../../../components/ui/Button';
+import Input from '../../../components/ui/Input';
+import Textarea from '../../../components/ui/Textarea';
+import Select from '../../../components/ui/Select';
+import LoadingSpinner from '../../../components/ui/LoadingSpinner';
+import StatusMessage from '../../../components/ui/StatusMessage';
 
 interface VelocityClassFormData {
   name: string;

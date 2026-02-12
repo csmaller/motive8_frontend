@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { newsApi } from '../../services/adminApi';
-import { peopleApi } from '../../services/peopleApi';
-import type { NewsCategory, NewsStatus } from '../../types';
-import Card from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
-import Input from '../../components/ui/Input';
-import Textarea from '../../components/ui/Textarea';
-import Select from '../../components/ui/Select';
-import LoadingSpinner from '../../components/ui/LoadingSpinner';
-import StatusMessage from '../../components/ui/StatusMessage';
+import { newsApi } from '../../../services/adminApi';
+import { peopleApi } from '../../../services/peopleApi';
+import type { NewsCategory, NewsStatus } from '../../../types';
+import Card from '../../../components/ui/Card';
+import Button from '../../../components/ui/Button';
+import Input from '../../../components/ui/Input';
+import Textarea from '../../../components/ui/Textarea';
+import Select from '../../../components/ui/Select';
+import LoadingSpinner from '../../../components/ui/LoadingSpinner';
+import StatusMessage from '../../../components/ui/StatusMessage';
 
 interface NewsFormData {
   title: string;

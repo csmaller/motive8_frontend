@@ -1,18 +1,18 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
-import { productsApi } from '../../services/adminApi';
-import { API_BASE_URL } from '../../config/api';
-import type { ProductCategory } from '../../types';
-import { PRODUCT_CATEGORIES } from '../../types';
-import Card from '../../components/ui/Card';
-import Button from '../../components/ui/Button';
-import Input from '../../components/ui/Input';
-import Textarea from '../../components/ui/Textarea';
-import Select from '../../components/ui/Select';
-import ImageUploader from '../../components/ui/ImageUploader';
-import LoadingSpinner from '../../components/ui/LoadingSpinner';
-import StatusMessage from '../../components/ui/StatusMessage';
+import { productsApi } from '../../../services/adminApi';
+import { API_BASE_URL } from '../../../config/api';
+import type { ProductCategory } from '../../../types';
+import { PRODUCT_CATEGORIES } from '../../../types';
+import Card from '../../../components/ui/Card';
+import Button from '../../../components/ui/Button';
+import Input from '../../../components/ui/Input';
+import Textarea from '../../../components/ui/Textarea';
+import Select from '../../../components/ui/Select';
+import ImageUploader from '../../../components/ui/ImageUploader';
+import LoadingSpinner from '../../../components/ui/LoadingSpinner';
+import StatusMessage from '../../../components/ui/StatusMessage';
 
 interface ProductFormData {
   name: string;
