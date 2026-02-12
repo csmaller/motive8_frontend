@@ -120,7 +120,7 @@ const AdminEventsEdit: React.FC = () => {
         formData.append('location', data.location);
         formData.append('description', data.description);
         formData.append('type', data.type);
-        formData.append('registration_required', String(data.registrationRequired));
+        formData.append('registration_required', data.registrationRequired ? '1' : '0');
         formData.append('max_participants', String(data.maxParticipants));
         if (data.registrationDeadline) formData.append('registration_deadline', data.registrationDeadline);
         formData.append('cost', String(data.cost));
