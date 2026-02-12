@@ -399,10 +399,7 @@ const Events: React.FC = () => {
         <p className="text-xl text-gray-600 max-w-3xl mx-auto">
           Stay updated on all our events and be the first to know about new training opportunities and races.
         </p>
-        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-          <Button size="lg">
-            Join Our Newsletter
-          </Button>
+        <div className="flex justify-center">
           <Button variant="outline" size="lg" onClick={() => window.location.href = '/contact'}>
             Contact Us for More Info
           </Button>
