@@ -82,7 +82,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     logout,
     isLoading,
     isAuthenticated: !!user,
-    isSuperAdmin: user?.user_type === 'admin'
+    isSuperAdmin: user?.user_type_id === 1
   };
 
   return (

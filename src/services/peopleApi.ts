@@ -7,7 +7,7 @@ interface ApiPersonResponse {
   user_id?: string;
   person_id?: string;
   username?: string;
-  user_type?:string;
+  user_type_id?: number;
   email?: string;
   created_at?: string;
   createdAt?: string;
@@ -49,7 +49,7 @@ interface ApiPersonResponse {
     updatedAt?: string;
     person_id?: string;
     username?: string;
-    user_type?: string;
+    user_type_id?: number;
     email?: string;
     last_login?: string;
     user?: {
@@ -131,7 +131,7 @@ export const peopleApi = {
         personId: item.person_id || item.id || '',
         username: item.username || '',
         email: item.email || '',
-         user_type: item.user_type ||"",
+        user_type_id: item.user?.user_type_id || item.user_type_id || 3,
         createdAt: new Date(item.created_at || item.createdAt || Date.now()),
         updatedAt: new Date(item.updated_at || item.updatedAt || Date.now()),
         lastLogin: item.last_login ? new Date(item.last_login) : undefined,
@@ -178,7 +178,7 @@ export const peopleApi = {
         id: item.id || item.user_id || '',
         personId: item.person_id || item.id || '',
         username: item.username || '',
-        user_type: item.user_type ||"",
+        user_type_id: item.user?.user_type_id || item.user_type_id || 3,
         email: item.email || '',
         createdAt: new Date(item.created_at || item.createdAt || Date.now()),
         updatedAt: new Date(item.updated_at || item.updatedAt || Date.now()),
@@ -236,7 +236,7 @@ export const peopleApi = {
         personId: item.person_id || item.id || '',
         username: item.username || email.split('@')[0] || '',
         email: email,
-        user_type: item.user_type || "",
+        user_type_id: item.user?.user_type_id || item.user_type_id || 3,
         createdAt: new Date(item.created_at || item.createdAt || Date.now()),
         updatedAt: new Date(item.updated_at || item.updatedAt || Date.now()),
         lastLogin: item.last_login ? new Date(item.last_login) : undefined,
@@ -264,11 +264,11 @@ export const peopleApi = {
   // Create new user (creates both person and user records)
   create: async (userData: CreateUserData): Promise<UserProfile> => {
     try {
-      // Step 1: Create the user first (only email, password, user_type)
+      // Step 1: Create the user first (only email, password, user_type_id)
       const userPayload = {
         email: userData.email,
         password: userData.password,
-        user_type: "coach",
+        user_type_id: 2, // 2 = coach
       };
 
       console.log('Step 1: Creating user with data:', userPayload);
@@ -374,7 +374,7 @@ export const peopleApi = {
         id: item.id || item.user_id || '',
         personId: item.person_id || item.id || '',
         username: item.username || '',
-        user_type:"coach",
+        user_type_id: 2, // coach
         email: item.email || '',
         createdAt: new Date(item.created_at || item.createdAt || Date.now()),
         updatedAt: new Date(item.updated_at || item.updatedAt || Date.now()),
@@ -398,7 +398,7 @@ export const peopleApi = {
         id: Date.now().toString(),
         personId: (Date.now() + 1).toString(),
         username: userData.username,
-        user_type:"coach",
+        user_type_id: 2, // coach
         email: userData.email,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -488,7 +488,7 @@ export const peopleApi = {
         id: String(userId),
         personId: String(item.person_id || item.id || ''),
         username: item.username || email.split('@')[0] || '',
-        user_type: item.user_type ||"",
+        user_type_id: item.user?.user_type_id || item.user_type_id || 3,
         email: email,
         createdAt: new Date(item.created_at || item.createdAt || Date.now()),
         updatedAt: new Date(item.updated_at || item.updatedAt || Date.now()),
@@ -640,7 +640,7 @@ function getMockUsers(): UserProfile[] {
       personId: '1',
       username: 'admin',
       email: 'admin@m8team.com',
-      user_type:"admin",
+      user_type_id: 1, // admin
       lastLogin: new Date('2026-01-30T10:30:00Z'),
       createdAt: new Date('2025-01-01T00:00:00Z'),
       updatedAt: new Date('2026-01-30T10:30:00Z'),
@@ -660,7 +660,7 @@ function getMockUsers(): UserProfile[] {
       personId: '2',
       username: 'sarah.coach',
       email: 'sarah@m8team.com',
-      user_type:"student",
+      user_type_id: 2, // coach
       lastLogin: new Date('2026-01-29T14:15:00Z'),
       createdAt: new Date('2025-02-15T00:00:00Z'),
       updatedAt: new Date('2026-01-29T14:15:00Z'),
@@ -680,7 +680,7 @@ function getMockUsers(): UserProfile[] {
       personId: '3',
       username: 'mike.coach',
       email: 'mike@m8team.com',
-      user_type:"student",
+      user_type_id: 2, // coach
       lastLogin: new Date('2026-01-28T09:45:00Z'),
       createdAt: new Date('2025-03-01T00:00:00Z'),
       updatedAt: new Date('2026-01-28T09:45:00Z'),
@@ -699,7 +699,7 @@ function getMockUsers(): UserProfile[] {
       id: '4',
       personId: '4',
       username: 'john.member',
-      user_type:"student",
+      user_type_id: 3, // student
       email: 'john.doe@email.com',
       lastLogin: new Date('2026-01-25T18:20:00Z'),
       createdAt: new Date('2025-06-10T00:00:00Z'),
@@ -720,7 +720,7 @@ function getMockUsers(): UserProfile[] {
       personId: '5',
       username: 'jane.admin',
       email: 'jane.admin@m8team.com',
-      user_type:"student",
+      user_type_id: 1, // admin
       lastLogin: new Date('2025-12-15T16:30:00Z'),
       createdAt: new Date('2025-04-20T00:00:00Z'),
       updatedAt: new Date('2025-12-15T16:30:00Z'),

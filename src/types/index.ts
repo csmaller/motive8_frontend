@@ -119,6 +119,7 @@ export interface Person {
   specializations?: string[]; // For coaches - their areas of expertise
   createdAt: Date;
   updatedAt: Date;
+  user?:User;
 }
 
 /**
@@ -130,9 +131,9 @@ export interface User {
   personId: string; // Foreign key to Person
   username: string;
   email: string;
+  user_type_id: number;
   lastLogin?: Date;
   createdAt: Date;
-  user_type:string;
   updatedAt: Date;
 }
 
