@@ -1,4 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { newsApi } from '../../services/adminApi';
 import type { NewsCategory, NewsArticle } from '../../types';
 import Card from '../../components/ui/Card';
@@ -150,9 +151,11 @@ const News: React.FC = () => {
                       </div>
                     </div>
                     
-                    <Button variant="primary" size="sm">
-                      Read Full Article
-                    </Button>
+                    <Link to={`/news/${article.id}`}>
+                      <Button variant="primary" size="sm">
+                        Read Full Article
+                      </Button>
+                    </Link>
                   </div>
                 </Card>
               ))}
@@ -206,9 +209,11 @@ const News: React.FC = () => {
                   </div>
                   
                   <div className="ml-6">
-                    <Button variant="outline" size="sm">
-                      Read More
-                    </Button>
+                    <Link to={`/news/${article.id}`}>
+                      <Button variant="outline" size="sm">
+                        Read More
+                      </Button>
+                    </Link>
                   </div>
                 </div>
               </Card>

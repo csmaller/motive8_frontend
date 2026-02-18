@@ -11,6 +11,7 @@ import Events from './pages/Events';
 import VelocityClasses from './pages/VelocityClasses';
 import Store from './pages/Store';
 import News from './pages/News';
+import NewsDetail from './pages/News/Detail';
 import NotFound from './pages/NotFound';
 import AdminLogin from './pages/Admin/Login';
 import AdminDashboard from './pages/Admin/Dashboard';
@@ -67,6 +68,11 @@ function App() {
             <Route path="/news" element={
               <Layout>
                 <News />
+              </Layout>
+            } />
+            <Route path="/news/:id" element={
+              <Layout>
+                <NewsDetail />
               </Layout>
             } />
 
