@@ -89,8 +89,16 @@ const Coaches: React.FC = () => {
           <Button
             variant="outline"
             size="sm"
-            onClick={() => window.location.href = `mailto:${coach.email}`}
+            onClick={() => {
+              if (coach.email) {
+                window.location.href = `mailto:${coach.email}`;
+              } else {
+                console.warn('Coach email not available');
+                alert('Email address not available for this coach');
+              }
+            }}
             className="w-full"
+            disabled={!coach.email}
           >
             Contact Coach
           </Button>
