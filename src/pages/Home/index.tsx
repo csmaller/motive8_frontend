@@ -179,9 +179,11 @@ const Home: React.FC = () => {
                       <span className="text-xs text-gray-500">
                         {article.readTime} min read
                       </span>
-                      <Button variant="outline" size="sm">
-                        Read More
-                      </Button>
+                      <Link to="/news">
+                        <Button variant="outline" size="sm">
+                          Read More
+                        </Button>
+                      </Link>
                     </div>
                   </div>
                 </div>
